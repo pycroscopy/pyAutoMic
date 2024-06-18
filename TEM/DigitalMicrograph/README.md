@@ -10,3 +10,4 @@
 | 6           | Run the client                   | Run the client on any remote computer on the same network. Refer to the example Jupyter notebook |
 |             |                                  | provided in the GitHub and correctly mention the port and IP of the server.                      |
 ------------------------------------------------------------------------------------------------------------------------------------------------------
+
