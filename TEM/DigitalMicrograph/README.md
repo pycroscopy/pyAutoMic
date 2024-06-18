@@ -1,4 +1,4 @@
-# DigitalMicrograph remote acquisition tool - [arxiv-preprint](https://arxiv.org/abs/2406.11018)
+# DigitalMicrograph remote acquisition tool - [arxiv-preprint-link](https://arxiv.org/abs/2406.11018)
 
 
 
