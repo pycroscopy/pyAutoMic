@@ -1,5 +1,6 @@
 # DigitalMicrograph remote acquisition tool - [arxiv-preprint-link](https://arxiv.org/abs/2406.11018)
 
+![Demo](assets/ISAAC_TF.gif)
 
 
 | Step Number | Action                           | Description                                                                                       |
