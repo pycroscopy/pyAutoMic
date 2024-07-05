@@ -1,4 +1,6 @@
-# DigitalMicrograph
+# DigitalMicrograph remote acquisition tool - [arxiv-preprint-link](https://arxiv.org/abs/2406.11018)
+
+
 
 | Step Number | Action                           | Description                                                                                       |
 |-------------|----------------------------------|---------------------------------------------------------------------------------------------------|
@@ -11,3 +13,5 @@
 |             |                                  | provided in the GitHub and correctly mention the port and IP of the server.                      |
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
+## Todo:
+Add more notebooks
