@@ -1,2 +1,2 @@
 # pyAutoMic
-Automated microscopy 
+AI assisted intelligent microscopy 
