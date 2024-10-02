@@ -1,4 +1,4 @@
-# DigitalMicrograph remote acquisition tool - [arxiv-preprint-link](https://arxiv.org/abs/2406.11018)
+# DigitalMicrograph remote acquisition tool - [Accepted manuscript link](https://pubs.aip.org/aip/rsi/article-abstract/95/10/103701/3314792/Realizing-smart-scanning-transmission-electron?redirectedFrom=fulltext)
 
 ![Demo](assets/ISAAC_TF.gif)
 
