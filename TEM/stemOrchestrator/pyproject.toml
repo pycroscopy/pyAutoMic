@@ -1,2 +1,9 @@
-author_email="utkarshp1161@gmail.com",
-description="A lightweight orchestrator for STEM acquisitions",
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stemOrchestrator"
+version = "0.1.0"
+description = "A lightweight orchestrator for STEM acquisitions"
+authors = [{ email = "utkarshp1161@gmail.com" }]

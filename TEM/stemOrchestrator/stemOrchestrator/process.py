@@ -18,7 +18,10 @@ import numpy as np
 import skimage.registration
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import Optional
+from typing import Tuple, Optional, Tuple, List
+import numpy as np
+import skimage.registration
+from scipy import ndimage
 
 def tiff_to_numpy(tiff_path: str) -> np.ndarray:
     """
@@ -109,11 +112,18 @@ def HAADF_tiff_to_png(HAADF_path: str) -> None:
     # Show the plot
     plt.show()
 
-from typing import Tuple, List
+def drift_compute_GD(fixed_image: np.ndarray, shifted_image: np.ndarray) -> Tuple[float, float, Optional[float], Optional[float]]:
+    """
+    Simple FFT based drift correction 
+    # credits : https://github.com/pycroscopy/pyTEMlib/blob/main/pyTEMlib/image_tools.py -> def rigid_registration(dataset, sub_pixel=True):
+    """
+    fft_fixed = np.fft.fft2(fixed_image)
+    fft_moving = np.fft.fft2(shifted_image)
+    image_product = fft_fixed * fft_moving.conj()
+    cc_image = np.fft.fftshift(np.fft.ifft2(image_product))
+    shift = np.array(ndimage.maximum_position(cc_image.real))-fixed_image.shape[0]/2
 
-import numpy as np
-import skimage.registration
-from typing import Tuple, Optional
+    return shift[0], shift[1]
 
 def compute_drift(
     image1: np.ndarray,

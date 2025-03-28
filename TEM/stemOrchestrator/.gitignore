@@ -176,3 +176,4 @@ day2day.txt
 *.txt
 *.tiff
 config_secret.json
+*.npz
