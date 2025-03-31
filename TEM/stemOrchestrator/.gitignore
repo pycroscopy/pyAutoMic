@@ -177,3 +177,6 @@ day2day.txt
 *.tiff
 config_secret.json
 *.npz
+*.png
+*.pkl
+*.pth

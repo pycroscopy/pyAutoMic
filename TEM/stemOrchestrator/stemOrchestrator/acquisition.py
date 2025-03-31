@@ -126,11 +126,46 @@ class TFacquisition:
         image_data = (255*(img/np.max(img))).astype(np.uint8)
         # HAADF_tiff_to_png(f"HAADF_image_{current_time}.tff")
         pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
-        
+        logging.info("Done: Acquiring HAADF image.")
+
         if return_pixel_size:
             return image_data, haadf_tiff_name, pixel_size_tuple
         
         return image_data, haadf_tiff_name
+
+    def acquire_ceta(self, exposure: float = 0.1, resolution: int = 4096, return_pixel_size = False) -> Tuple[np.ndarray, str, Optional[Tuple]]:
+        """Acquire CETA image.
+        Args:
+            exposure : float : 0.2 means 0.2 seconds i.e 200ms
+        
+        """
+        logging.info("Acquiring CETA image.")
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.ceta_cam.insert()
+        self.microscope.optics.unblank()
+        image = self.microscope.acquisition.acquire_stem_image(CameraType.BM_CETA, resolution, exposure)# takes 40 seconds
+        self.microscope.optics.blank()
+        self.ceta_cam.retract()
+
+        image.save(f"CETA_image_{current_time}")# saves the tiff
+        ceta_tiff_name = f"CETA_image_{current_time}.tiff"
+        logging.info("saving CETA image as TF which has all the metadata..also returning an array")
+        # convert the image to noarray and return that as well
+        img = image.data - np.min(image.data)
+        image_data = (255*(img/np.max(img))).astype(np.uint8)
+        # n = ceta_image_data.shape[0]# 4096
+        # center_half = ceta_image_data[n // 4: 3 * n // 4, n // 4: 3 * n // 4]
+        # center_quarter = ceta_image_data[n // 2: 3 * n // 4, n // 2: 3 * n // 4]
+        # center_quarter = ceta_image_data[1024:-1024, 1024:-1024]
+
+        # CETA_tiff_to_png(f"CETA_image_{current_time}.tff")
+        pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
+        logging.info("Done: Acquiring CETA image.")
+
+        if return_pixel_size:
+            return image_data, ceta_tiff_name, pixel_size_tuple
+    
+        return image_data, ceta_tiff_name
             
     def drift_correct(self, haadf_image: np.ndarray, haadf_image_shifted: np.ndarray):
         """Perform drift correction based on HAADF."""
