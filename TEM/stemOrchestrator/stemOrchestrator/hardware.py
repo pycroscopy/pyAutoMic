@@ -63,3 +63,5 @@ class DMtwin:
         eels = (eels - np.min(eels)) / (np.max(eels) - np.min(eels))
         
         return serialize_array(eels)
+    
+    

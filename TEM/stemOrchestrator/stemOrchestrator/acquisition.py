@@ -125,15 +125,15 @@ class TFacquisition:
         img = image.data - np.min(image.data)
         image_data = (255*(img/np.max(img))).astype(np.uint8)
         # HAADF_tiff_to_png(f"HAADF_image_{current_time}.tff")
-        pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
         logging.info("Done: Acquiring HAADF image.")
 
         if return_pixel_size:
+            pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
             return image_data, haadf_tiff_name, pixel_size_tuple
         
         return image_data, haadf_tiff_name
 
-    def acquire_ceta(self, exposure: float = 0.1, resolution: int = 4096, return_pixel_size = False) -> Tuple[np.ndarray, str, Optional[Tuple]]:
+    def acquire_ceta(self, exposure: float = 0.1, resolution: int = 4096) -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire CETA image.
         Args:
             exposure : float : 0.2 means 0.2 seconds i.e 200ms
@@ -159,11 +159,9 @@ class TFacquisition:
         # center_quarter = ceta_image_data[1024:-1024, 1024:-1024]
 
         # CETA_tiff_to_png(f"CETA_image_{current_time}.tff")
-        pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
         logging.info("Done: Acquiring CETA image.")
+        pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
 
-        if return_pixel_size:
-            return image_data, ceta_tiff_name, pixel_size_tuple
     
         return image_data, ceta_tiff_name
             
@@ -404,9 +402,6 @@ class TFacquisition:
         return
 
 
-    
-
-
 class DMacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
     # also does optistem(C1_A1, C1, B2_A2)
@@ -455,7 +450,14 @@ class DMacquisition:
         logging.info(f"DONE EELS at dummy points just for checking.")
         return 
 
+# class CEOSacquisition:
+#     def __init__(self, microscope: Union[Pyro5.api.Proxy, DMtwin], offline: bool = True) -> None:
 
+# class DTMICacquisition:
+#     mic_server = Pyro5.api.Proxy(uri) 
+#     mic_server.initialize_microscope("STEM") 
+#     mic_server.register_data(dataset_path) 
+#     mic_server.get_point_data()
 
 class EDGEfilterAcquisition:
     def __init__(self, microscope):

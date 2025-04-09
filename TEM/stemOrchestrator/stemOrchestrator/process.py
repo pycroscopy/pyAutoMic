@@ -23,6 +23,57 @@ import numpy as np
 import skimage.registration
 from scipy import ndimage
 
+
+def etree_to_dict(element):
+    """Recursively converts an ElementTree object into a nested dictionary."""
+    d = {element.tag: {} if element.attrib else None}
+    children = list(element)
+    if children:
+        dd = defaultdict(list)
+        for dc in map(etree_to_dict, children):
+            for k, v in dc.items():
+                dd[k].append(v)
+        d = {element.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
+    if element.attrib:
+        d[element.tag].update(('@' + k, v) for k, v in element.attrib.items())
+    if element.text:
+        text = element.text.strip()
+        if children or element.attrib:
+            if text:
+                d[element.tag]['#text'] = text
+        else:
+            d[element.tag] = text
+    return d
+
+def tiff_metadata(tiff_path: str) -> dict:
+    """
+    Extracts all metadata from a TIFF file, including embedded XML tags (e.g., FEI_TITAN).
+
+    Args:
+        tiff_path (str): Path to the TIFF file.
+
+    Returns:
+        dict: A dictionary containing all metadata found in the TIFF file.
+    """
+    metadata = {}
+
+    with tifffile.TiffFile(tiff_path) as tif:
+        # Extract standard TIFF tags (ImageDescription, etc.)
+        for tag in tif.pages[0].tags.values():
+            name, value = tag.name, tag.value
+            metadata[name] = value
+
+        # Check for special XML tags like FEI_TITAN
+        if 'FEI_TITAN' in metadata:
+            try:
+                root = ET.fromstring(metadata['FEI_TITAN'])
+                metadata['FEI_TITAN_parsed'] = etree_to_dict(root)
+            except ET.ParseError:
+                print("Warning: Failed to parse FEI_TITAN metadata.")
+
+    return metadata
+
+
 def tiff_to_numpy(tiff_path: str) -> np.ndarray:
     """
     Reads a TIFF file and returns its image data as a NumPy array.
@@ -36,7 +87,8 @@ def tiff_to_numpy(tiff_path: str) -> np.ndarray:
     with tifffile.TiffFile(tiff_path) as tif:
         return tif.asarray()
 
-def HAADF_tiff_to_png(HAADF_path: str) -> None:
+
+def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False) -> None:
     """
     Autoscript HAADF tiff support
     Reads a HAADF TIFF file, extracts pixel size metadata, and plots the image with a scalebar.
@@ -83,7 +135,10 @@ def HAADF_tiff_to_png(HAADF_path: str) -> None:
 
     # Extract the PixelSize information
     binary_result = metadata_dict.get('Metadata', {}).get('BinaryResult', {})
+    
     pixel_size_x = binary_result.get('PixelSize', {}).get('X', {}).get('#text')
+    pixel_size_y = binary_result.get('PixelSize', {}).get('Y', {}).get('#text')
+
     unit_x = binary_result.get('PixelSize', {}).get('X', {}).get('@unit')
     
     # Convert pixel size to float
@@ -111,19 +166,62 @@ def HAADF_tiff_to_png(HAADF_path: str) -> None:
 
     # Show the plot
     plt.show()
+    
+    if return_pixel_size == True:
+        return pixel_size_x, float(pixel_size_y)
 
-def drift_compute_GD(fixed_image: np.ndarray, shifted_image: np.ndarray) -> Tuple[float, float, Optional[float], Optional[float]]:
+def tiff_to_png(HAADF_path: str) -> None:
+    """
+    Autoscript ceta tiff support
+    Reads a ceta TIFF file, extracts pixel size metadata, and plots the image with a scalebar.
+
+    Args:
+        ceta_path (str): Path to the HAADF TIFF file.
+
+    Returns:
+        None
+    """
+
+    # Read the TIFF image data
+    with tifffile.TiffFile(HAADF_path) as tif:
+        image = tif.asarray()
+
+    # Plot the image
+    fig, ax = plt.subplots()
+    ax.imshow(image, cmap='gray')
+    ax.axis('off')
+    plt.show()
+    
+    
+# def compute_drift_GD(fixed_image: np.ndarray, shifted_image: np.ndarray) -> Tuple[float, float, Optional[float], Optional[float]]:
+#     """
+#     Simple FFT based drift correction 
+#     # credits : https://github.com/pycroscopy/pyTEMlib/blob/main/pyTEMlib/image_tools.py -> def rigid_registration(dataset, sub_pixel=True):
+#     """
+#     fft_fixed = np.fft.fft2(fixed_image)
+#     fft_fixed -= fft_fixed.min()
+#     fft_fixed /= fft_fixed.max()
+#     fft_moving = np.fft.fft2(shifted_image)
+#     fft_moving -= fft_moving.min()
+#     fft_moving /= fft_moving.max()
+#     image_product = fft_fixed * fft_moving.conj()
+#     cc_image = np.fft.fftshift(np.fft.ifft2(image_product))
+#     shift = np.array(ndimage.maximum_position(cc_image.real))-fixed_image.shape[0]/2
+
+#     return shift[0], shift[1], image_product
+
+def compute_drift_GD(fixed_image: np.ndarray, shifted_image: np.ndarray, normalization: str = "low_mag") -> Tuple[float, float, Optional[float], Optional[float]]:
     """
     Simple FFT based drift correction 
     # credits : https://github.com/pycroscopy/pyTEMlib/blob/main/pyTEMlib/image_tools.py -> def rigid_registration(dataset, sub_pixel=True):
     """
-    fft_fixed = np.fft.fft2(fixed_image)
-    fft_moving = np.fft.fft2(shifted_image)
-    image_product = fft_fixed * fft_moving.conj()
-    cc_image = np.fft.fftshift(np.fft.ifft2(image_product))
-    shift = np.array(ndimage.maximum_position(cc_image.real))-fixed_image.shape[0]/2
+    if normalization == "low_mag":
+        normalization = "phase"   
+    else:
+        normalization = None
+    drift, error, _ =  skimage.registration.phase_cross_correlation(fixed_image, shifted_image, normalization=normalization)# normalization can be None or "phase"- it gives all the drift in y direction which I dont get right now
+    return drift[0], drift[1]
 
-    return shift[0], shift[1]
 
 def compute_drift(
     image1: np.ndarray,
@@ -184,7 +282,7 @@ def plot_drift_comparison(image1, image2, shift_x, shift_y):
     fig : Matplotlib figure
     """
 
-    fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+    fig, axs = plt.subplots(1, 4, figsize=(18, 6))
 
     # Overlay shifted image on original
     combined = np.zeros((image1.shape[0], image1.shape[1], 3))
@@ -211,14 +309,21 @@ def plot_drift_comparison(image1, image2, shift_x, shift_y):
     axs[2].imshow(combined)
     axs[2].set_title("Overlay of Both Images (Drift Visualization)")
 
-    # Add drift magnitude annotation
-    plt.figtext(
-        0.5,
-        0.02,
-        f"Measured Drift: ({shift_x:.2f}, {shift_y:.2f}) pixels | Magnitude: {np.sqrt(shift_x**2 + shift_y**2):.2f} pixels",
-        ha="center",
-        bbox=dict(facecolor="white", alpha=0.7),
-    )
+
+    imPlus = image1[ int(shift_x):, : int(shift_y)] + image2[:-int(shift_x), -int(shift_y):]
+    # This line serves as a verification step for drift correction by summing the overlapping regions 
+    # of two images after applying the estimated shift (shift_x, shift_y). If the drift estimate 
+    # is accurate, the resulting sum (imPlus) should show well-aligned features, confirming successful correction.
+    axs[3].imshow(imPlus)
+    axs[3].set_title("slicing and adding")
+    # # Add drift magnitude annotation
+    # plt.figtext(
+    #     0.5,
+    #     0.02,
+    #     f"Measured Drift: ({shift_x:.2f}, {shift_y:.2f}) pixels | Magnitude: {np.sqrt(shift_x**2 + shift_y**2):.2f} pixels",
+    #     ha="center",
+    #     bbox=dict(facecolor="white", alpha=0.7),
+    # )
 
     plt.tight_layout()
     return fig
