@@ -182,4 +182,4 @@ config_secret.json
 *.pth
 
 # Allow specific PNGs
-!assests/stemOrchestrator.png
+!assests/stemOrchestratorv2.png
