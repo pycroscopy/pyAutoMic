@@ -10,7 +10,7 @@ import numpy as np
 from datetime import datetime
 import Pyro5
 import copy
-from stemOrchestrator.hardware import DMtwin
+from TEM.stemOrchestrator.stemOrchestrator.simulation import DMtwin
 
 
 class TFacquisition:

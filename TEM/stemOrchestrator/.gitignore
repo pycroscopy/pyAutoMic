@@ -180,3 +180,6 @@ config_secret.json
 *.png
 *.pkl
 *.pth
+
+# Allow specific PNGs
+!assests/stemOrchestrator.png
