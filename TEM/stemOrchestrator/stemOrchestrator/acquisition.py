@@ -139,7 +139,7 @@ class TFacquisition:
         img = image.data - np.min(image.data)
         image_data = (255*(img/np.max(img))).astype(np.uint8)
         # HAADF_tiff_to_png(f"HAADF_image_{current_time}.tff")
-        logging.info("Done: Acquiring HAADF image.")
+        logging.info("Done: Acquiring HAADF image - beam is blanked after acquisition - HAADF det is inserted")
 
         if return_pixel_size:
             pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
@@ -173,7 +173,7 @@ class TFacquisition:
         # center_quarter = ceta_image_data[1024:-1024, 1024:-1024]
 
         # CETA_tiff_to_png(f"CETA_image_{current_time}.tff")
-        logging.info("Done: Acquiring CETA image.")
+        logging.info("Done: Acquiring CETA image. Beam is blanked and ceta detector is retracted")
         pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
 
     
