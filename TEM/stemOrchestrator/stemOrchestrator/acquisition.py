@@ -10,7 +10,7 @@ import numpy as np
 from datetime import datetime
 import Pyro5
 import copy
-from TEM.stemOrchestrator.stemOrchestrator.simulation import DMtwin
+from stemOrchestrator.simulation import DMtwin
 
 
 class TFacquisition:
@@ -67,8 +67,11 @@ class TFacquisition:
         self.query_paused_beam_positon()
         self.query_is_beam_balanked()
         self.query_optical_mode()
+        self.query_ceta_state()
+        self.query_haadf_state()
         # self.query_FOV() --> only present in STEM mode
         self.query_screen_postion()
+        self.query_screen_current()
         logging.info("DONE: quering the state of microscope")
         pass
         
@@ -110,6 +113,17 @@ class TFacquisition:
         logging.info(f"DONE: The state of the screen is {val} ")
         return val
 
+    def query_haadf_state(self) -> str:
+        logging.info("Request to query the position of the HAADF")
+        val = self.haadf_det.insertion_state
+        logging.info(f"DONE: The state of the HAADF is {val} ")
+        return val
+    
+    def query_ceta_state(self) -> str:
+        logging.info("Request to query the position of the CETA")
+        val = self.ceta_cam.insertion_state
+        logging.info(f"DONE: The state of the CETA is {val} ")
+        return val
 
     def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size = False) -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire HAADF image."""

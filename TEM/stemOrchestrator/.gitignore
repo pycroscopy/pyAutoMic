@@ -183,3 +183,5 @@ config_secret.json
 
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
+
+notebooks/withoutUI/
