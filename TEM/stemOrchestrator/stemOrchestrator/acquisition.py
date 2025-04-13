@@ -22,8 +22,7 @@ class TFacquisition:
         """Initialize the microscope and set up acquisition parameters."""
         logging.info("Starting microscope initialization...")
         self.microscope = microscope
-        logging.info("LOGGING STATE of the Microscope================================================")
-        self.query_state_of_microscope()
+
         
         try:
             self.ceta_cam = self.microscope.detectors.get_camera_detector(CameraType.BM_CETA)
@@ -33,7 +32,8 @@ class TFacquisition:
         except Exception as e:
             logging.error(f"Failed to initialize detectors: {str(e)}")
             raise
-        
+        logging.info("LOGGING STATE of the Microscope================================================")
+        self.query_state_of_microscope()
         # Log early the state of the microscope [stage{x, y, z, A, B}, paused beam postion{b/w 0 and 1 in x and y}, screen_current]
         # self.query_vacuum_valves()
         # self.current_stage_position = self.query_stage_position()
@@ -67,8 +67,8 @@ class TFacquisition:
         self.query_paused_beam_positon()
         self.query_is_beam_balanked()
         self.query_optical_mode()
-        self.query_ceta_state()
         self.query_haadf_state()
+        self.query_ceta_state()
         # self.query_FOV() --> only present in STEM mode
         self.query_screen_postion()
         self.query_screen_current()
