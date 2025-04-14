@@ -3,7 +3,7 @@
 import logging
 import Pyro5.api
 from autoscript_tem_microscope_client import TemMicroscopeClient
-from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod
+from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode
 from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage
 from typing import Tuple, Dict, List, Optional, Union
 import numpy as np
@@ -64,14 +64,16 @@ class TFacquisition:
         logging.info("Request to log the state of the microscope")
         self.query_list_of_detectors()
         self.query_vacuum_valves()
-        self.query_paused_beam_positon()
-        self.query_is_beam_balanked()
+        self.query_beam_shift_position()
+        self.query_is_beam_blanked()
         self.query_optical_mode()
         self.query_haadf_state()
         self.query_ceta_state()
         # self.query_FOV() --> only present in STEM mode
         self.query_screen_postion()
         self.query_screen_current()
+        self.query_paused_beam_positon()
+        self.query_stage_position()
         logging.info("DONE: quering the state of microscope")
         pass
         
@@ -106,6 +108,18 @@ class TFacquisition:
         optical_mode = self.microscope.optics.optical_mode
         logging.info(f"DONE: the optical mde of the microsocpe is {optical_mode}")
         return optical_mode
+    
+    def set_to_STEM_mode(self) -> None:
+        logging.info("Request to set to Optical mode =  STEM mode")
+        self.microscope.optics.optical_mode = OpticalMode.STEM
+        logging.info(f"DONE: set to Optical mode =  STEM mode")
+        return None     
+    
+    def set_to_TEM_mode(self) -> None:
+        logging.info("Request to set to Optical mode =  TEM mode")
+        self.microscope.optics.optical_mode = OpticalMode.TEM
+        logging.info(f"DONE: set to Optical mode =  TEM mode")
+        return None   
     
     def query_screen_postion(self) -> str:
         logging.info("Request to query the position of the screen")
@@ -239,8 +253,9 @@ class TFacquisition:
 
     def query_paused_beam_positon(self) -> Point:
         # x lies b/w 0 to 1 and y lies b/w 0 to 1
+        logging.info("Request to query the paused beam postion")
         pos = self.microscope.optics.paused_scan_beam_position
-        logging.info(f"Query beam position: which is at {pos}")
+        logging.info(f"DONE: Query Paused beam position: which is at {pos}")
         return pos
 
     def move_paused_beam(self, x : float, y: float ) -> None:
@@ -294,10 +309,19 @@ class TFacquisition:
         logging.info(f"DONE : undo last stage movement - stage is now at {self.current_stage_position}")
         return None
 
-    def move_stage_translation(self, x: float, y: float, z: float, relative: bool = True) ->  None:
+    def move_stage_translation_relative(self, x: float, y: float, z: float, relative: bool = True) ->  None:
         ## put x, y, z in nm
-        logging.info("Request to translate the stage")
+        logging.info("Request to translate the stage relative values")
         self.microscope.specimen.stage.relative_move(StagePosition(x = x*10**-9, y = y*10**-9 , z = z*10**-9))
+        logging.info("Done: translate the stage relative values")
+
+        pass     
+
+    def move_stage_translation_absolute(self, x: float, y: float, z: float, relative: bool = True) ->  None:
+        ## put x, y, z in m - unlike the  move_stage_translation_relative
+        logging.info("Request to translate the stage absolute values")
+        self.microscope.specimen.stage.absolute_move_safe(StagePosition(x = x, y = y , z = z))
+        logging.info("DONE: shifted atage to absolute values")
         pass     
         
     def move_stage_rotation(self, alpha: float = None, beta: float = None, single_tilt_holder = True):
@@ -331,10 +355,10 @@ class TFacquisition:
         logging.info(f"Done: beam shift(not paused beam) to {self.current_beam_shift_pos}")
         return 
         
-    def query_is_beam_balanked(self) -> bool:
+    def query_is_beam_blanked(self) -> bool:
         # check if beam is blanked or not
         val = self.microscope.optics.is_beam_blanked
-        logging.info(f"Checking for beam blanked or not -- current status: {val}")
+        logging.info(f"Checking: Is beam blanked?-- current status: {val}")
         return val
     
     def blank_beam(self) -> None:
