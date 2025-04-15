@@ -185,3 +185,5 @@ config_secret.json
 !assests/stemOrchestratorv2.png
 
 notebooks/withoutUI/
+
+notebooks/mat3ra/

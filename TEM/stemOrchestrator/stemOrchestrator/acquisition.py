@@ -29,6 +29,7 @@ class TFacquisition:
             logging.info("CETA camera initialized")
             self.haadf_det = self.microscope.detectors.get_scanning_detector(DetectorType.HAADF)
             logging.info("HAADF detector initialized")
+            self.flu_cam = self.microscope.detectors.get_camera_detector(CameraType.FLUCAM)
         except Exception as e:
             logging.error(f"Failed to initialize detectors: {str(e)}")
             raise
@@ -161,23 +162,29 @@ class TFacquisition:
         
         return image_data, haadf_tiff_name
 
-    def acquire_ceta(self, exposure: float = 0.1, resolution: int = 4096) -> Tuple[np.ndarray, str, Optional[Tuple]]:
+    def acquire_ceta_or_flucam(self, exposure: float = 0.1, resolution: int = 4096, camera : str = "ceta") -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire CETA image.
         Args:
             exposure : float : 0.2 means 0.2 seconds i.e 200ms
         
         """
-        logging.info("Acquiring CETA image.")
+        if camera == "ceta":
+            camera = CameraType.BM_CETA
+        elif camera == "flucam":
+            camera = CameraType.FLUCAM
+        else:
+            pass
+        logging.info(f"Acquiring {camera} image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.ceta_cam.insert()
         self.microscope.optics.unblank()
-        image = self.microscope.acquisition.acquire_stem_image(CameraType.BM_CETA, resolution, exposure)# takes 40 seconds
+        image = self.microscope.acquisition.acquire_camera_image(camera, resolution, exposure)# takes 40 seconds
         self.microscope.optics.blank()
         self.ceta_cam.retract()
 
-        image.save(f"CETA_image_{current_time}")# saves the tiff
-        ceta_tiff_name = f"CETA_image_{current_time}.tiff"
-        logging.info("saving CETA image as TF which has all the metadata..also returning an array")
+        image.save(f"{camera}_image_{current_time}")# saves the tiff
+        ceta_tiff_name = f"{camera}_image_{current_time}.tiff"
+        logging.info(f"saving {camera} image as TF which has all the metadata..also returning an array")
         # convert the image to noarray and return that as well
         img = image.data - np.min(image.data)
         image_data = (255*(img/np.max(img))).astype(np.uint8)
@@ -187,11 +194,13 @@ class TFacquisition:
         # center_quarter = ceta_image_data[1024:-1024, 1024:-1024]
 
         # CETA_tiff_to_png(f"CETA_image_{current_time}.tff")
-        logging.info("Done: Acquiring CETA image. Beam is blanked and ceta detector is retracted")
+        logging.info(f"Done: Acquiring {camera} image. Beam is blanked and ceta detector is retracted")
         pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
 
     
         return image_data, ceta_tiff_name
+
+
             
     def drift_correct(self, haadf_image: np.ndarray, haadf_image_shifted: np.ndarray):
         """Perform drift correction based on HAADF."""
