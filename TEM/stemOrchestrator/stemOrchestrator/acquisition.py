@@ -200,6 +200,11 @@ class TFacquisition:
     
         return image_data, ceta_tiff_name
 
+    def query_defocus(self)-> str:
+        logging.info("Request to query the defocus value")
+        val = self.microscope
+        logging.info(f"DONE: The state of the HAADF is {val} ")
+        return val
 
             
     def drift_correct(self, haadf_image: np.ndarray, haadf_image_shifted: np.ndarray):

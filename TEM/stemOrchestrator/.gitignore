@@ -180,10 +180,12 @@ config_secret.json
 *.png
 *.pkl
 *.pth
-
+*.yaml
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 
 notebooks/withoutUI/
 
 notebooks/mat3ra/
+
+notebooks/experiments/
