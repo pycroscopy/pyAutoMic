@@ -1,0 +1,23 @@
+#for tfacquisition to work:
+1. Python 3.8.17
+2. Install Autoscript-TEM : https://www.thermofisher.com/us/en/home/electron-microscopy/products/software-em-3d-vis/software-updates.html#autoscript
+3. opencv-python==4.10.0.84
+4. llvmlite==0.41.1
+5. SciFiReaders==0.11.5
+6. scikit-learn==1.3.2
+
+#for LLM assisted workflow to work
+1. pip install google-genai
+
+#for BO workflows to work
+1. botorch==0.8.5
+2. gpytorch==1.10
+3. torch==2.2.2
+4. torchvision==0.17.2
+
+#for SAM - segmentation to work
+1. segment-anything==1.0
+
+# for simulation
+1. abtem==1.0.0b34
+2. py4DSTEM

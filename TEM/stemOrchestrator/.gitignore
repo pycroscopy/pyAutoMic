@@ -183,6 +183,8 @@ config_secret.json
 *.yaml
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
+# Allow requirements
+!requirements.txt
 
 notebooks/withoutUI/
 
