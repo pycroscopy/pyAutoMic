@@ -170,13 +170,14 @@ class TFacquisition:
         """
         if camera == "ceta":
             camera = CameraType.BM_CETA
+            self.ceta_cam.insert()
         elif camera == "flucam":
             camera = CameraType.FLUCAM
+            self.flu_cam.insert()
         else:
             pass
         logging.info(f"Acquiring {camera} image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.ceta_cam.insert()
         self.microscope.optics.unblank()
         image = self.microscope.acquisition.acquire_camera_image(camera, resolution, exposure)# takes 40 seconds
         self.microscope.optics.blank()

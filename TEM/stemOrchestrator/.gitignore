@@ -188,6 +188,9 @@ config_secret.json
 
 notebooks/withoutUI/
 
-notebooks/mat3ra/
 
 notebooks/experiments/
+
+notebooks/simulation_related
+
+*.poscar
