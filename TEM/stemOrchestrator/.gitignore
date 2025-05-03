@@ -193,4 +193,5 @@ notebooks/experiments/
 
 notebooks/simulation_related
 
+notebooks/SAM_related/part*/
 *.poscar

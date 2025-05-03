@@ -29,6 +29,9 @@ class DMtwin:
         """Initialize the DM simulator."""
         pass
     
+    def acquire_camera(self, exposure = 0.05) -> None: # mimicks the eels detector
+        pass
+    
     def get_eels(self) -> Tuple[List[float], Tuple[int], str]:
         """
         Generate simulated EELS spectrum data with a prominent plasmon peak.

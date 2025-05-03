@@ -459,7 +459,7 @@ class DMacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
     # also does optistem(C1_A1, C1, B2_A2)
     # later - drift correct on HAADF, defocus series, Segment regions and cbed
-    def __init__(self, microscope: Union[Pyro5.api.Proxy, DMtwin], offline: bool = True) -> None:
+    def __init__(self, microscope: Optional[Union[Pyro5.api.Proxy, DMtwin]], offline: bool = True) -> None:
         """Initialize the microscope and set up acquisition parameters."""
         self.offline = offline
         if not self.offline :
@@ -473,12 +473,12 @@ class DMacquisition:
             
         else:## offline
             logging.info("initializing OFFLINE Microscope")
-            self.microscope = microscope
+            self.microscope = DMtwin()
             logging.info("Done: initialized OFFLINE Microscope")
         return None
     
     
-    def acquire_eels(self, eels_exposure_seconds : int = 2) -> np.ndarray:
+    def get_eels(self, eels_exposure_seconds : int = 2) -> np.ndarray:
         """Perform EELS acquisition to just check"""
         # TODO: eels_disp_mult --> need to handle
         if not self.offline:
