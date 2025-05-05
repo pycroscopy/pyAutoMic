@@ -181,6 +181,7 @@ config_secret.json
 *.pkl
 *.pth
 *.yaml
+*.npy
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 # Allow requirements
@@ -195,3 +196,4 @@ notebooks/simulation_related
 
 notebooks/SAM_related/part*/
 *.poscar
+
