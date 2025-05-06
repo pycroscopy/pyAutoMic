@@ -11,7 +11,12 @@ from datetime import datetime
 import Pyro5
 import copy
 from stemOrchestrator.simulation import DMtwin
-
+import json
+import logging
+from twisted.internet import reactor, defer
+from twisted.protocols.basic import NetstringReceiver
+from twisted.internet.protocol import ReconnectingClientFactory
+from stemOrchestrator.hardware import _CEOSFactory
 
 class TFacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
@@ -523,14 +528,59 @@ class DMacquisition:
         logging.info(f"DONE EELS at dummy points just for checking.")
         return 
 
-# class CEOSacquisition:
-#     def __init__(self, microscope: Union[Pyro5.api.Proxy, DMtwin], offline: bool = True) -> None:
 
-# class DTMICacquisition:
-#     mic_server = Pyro5.api.Proxy(uri) 
-#     mic_server.initialize_microscope("STEM") 
-#     mic_server.register_data(dataset_path) 
-#     mic_server.get_point_data()
+
+
+class CEOSacquisition:
+    # based on dummy client provided by CEOS
+    def __init__(self, host="127.0.0.1", port=7072):
+        logging.info("Request to initialize CEOS client")
+        self.host = host
+        self.port = port
+        self._protocol = None
+        factory = _CEOSFactory(self)
+        reactor.connectTCP(self.host, self.port, factory)
+        logging.info("DONE: Request to initialize CEOS client")
+
+
+    def run_tableau(self, tab_type="Standard", angle=18):        
+        logging.info("Request to run Tableau - default beam angle is 18")
+
+        result = {}
+
+        def on_success(data):
+            result["data"] = data
+            reactor.stop()
+
+        def on_fail(err):
+            result["error"] = err.getErrorMessage()
+            reactor.stop()
+
+        d = defer.Deferred()
+
+        def wait_protocol(_):
+            return self._protocol.call("acquireTableau", {
+                "tabType": tab_type,
+                "angle": angle
+            })
+
+        def check_ready():
+            if self._protocol:
+                d.callback(None)
+            else:
+                reactor.callLater(0.1, check_ready)
+
+        d.addCallback(wait_protocol)
+        d.addCallback(on_success)
+        d.addErrback(on_fail)
+
+        check_ready()
+        reactor.run()
+        logging.info("Done: Request to run Tableau")
+
+        if "data" in result:
+            return result["data"]
+        raise RuntimeError(result.get("error", "Unknown error"))
 
 class EDGEfilterAcquisition:
     def __init__(self, microscope):
