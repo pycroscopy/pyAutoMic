@@ -3,8 +3,8 @@
 import logging
 import Pyro5.api
 from autoscript_tem_microscope_client import TemMicroscopeClient
-from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode
-from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage
+from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode, EdsDetectorType, ExposureTimeType
+from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage, EdsAcquisitionSettings, AdornedSpectrum
 from typing import Tuple, Dict, List, Optional, Union
 import numpy as np
 from datetime import datetime
@@ -226,12 +226,32 @@ class TFacquisition:
         # Simulated edge detection
         return 
     
+    def configure_eds_settings(self, eds_detector_name: str = EdsDetectorType.SUPER_X, dispersion: int=5, shaping_time: float = 3e-6, exposure_time: float = 2, exposure_time_type: str = ExposureTimeType.LIVE_TIME) -> EdsAcquisitionSettings:
+        """Configure the EDS acquisition settings."""
+        logging.info(f"Request prepare settings for EDS acquisiton.")
+        settings = EdsAcquisitionSettings()
+        settings.eds_detector = eds_detector_name
+        settings.dispersion = dispersion
+        settings.shaping_time = shaping_time
+        settings.exposure_time = exposure_time
+        settings.exposure_time_type = exposure_time_type
+        logging.info(f"DONE: Request prepare settings for EDS acquisiton.")
+        return settings
     
-    def acquire_edx(self, edge_coords):
-        """Perform EDX at extracted edge coordinates."""
-        logging.info(f"Performing EELS at {edge_coords}.")
-        # Simulated EELS acquisition
-        return "eels_spectrum"
+    def acquire_eds(self, settings: EdsAcquisitionSettings, handle_byte_order : bool = True) -> Union[np.ndarray, AdornedSpectrum]:
+        """Perform EDS : TODO - make sure byte order issue is taken care from tf side"""
+        logging.info(f"Request for eds acquisiton")
+        if settings == None:
+            settings = self.configure_eds_settings()
+        eds_spectrum = self.microscope.analysis.acquire_eds_spectrum(settings)
+        
+        if handle_byte_order == True:
+            logging.info(f"Handling byte order issue----verify if not----needed")
+            dt = np.dtype('uint32').newbyteorder('<')
+            eds_spectrum = np.frombuffer(eds_spectrum._raw_data, dtype=dt)
+
+        logging.info(f"DONE: Request for eds acquisiton")
+        return eds_spectrum
 
     def autofocus(self, exposure : float = 1e-5, haadf_resolution: int = 1024) -> None:
         """Perform autofocus with HAADF detector"""
