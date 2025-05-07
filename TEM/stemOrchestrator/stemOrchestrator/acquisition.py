@@ -530,7 +530,6 @@ class DMacquisition:
 
 
 
-
 class CEOSacquisition:
     # based on dummy client provided by CEOS
     def __init__(self, host="127.0.0.1", port=7072):
@@ -542,10 +541,7 @@ class CEOSacquisition:
         reactor.connectTCP(self.host, self.port, factory)
         logging.info("DONE: Request to initialize CEOS client")
 
-
-    def run_tableau(self, tab_type="Standard", angle=18):        
-        logging.info("Request to run Tableau - default beam angle is 18")
-
+    def _run_rpc(self, method: str, params: dict):
         result = {}
 
         def on_success(data):
@@ -559,10 +555,7 @@ class CEOSacquisition:
         d = defer.Deferred()
 
         def wait_protocol(_):
-            return self._protocol.call("acquireTableau", {
-                "tabType": tab_type,
-                "angle": angle
-            })
+            return self._protocol.call(method, params)
 
         def check_ready():
             if self._protocol:
@@ -576,11 +569,39 @@ class CEOSacquisition:
 
         check_ready()
         reactor.run()
-        logging.info("Done: Request to run Tableau")
 
         if "data" in result:
             return result["data"]
         raise RuntimeError(result.get("error", "Unknown error"))
+
+    def run_tableau(self, tab_type: str = "Standard", angle: float = 18):
+        logging.info("Request to run Tableau - default beam angle is 18 mrad (milli-radian)")
+        data = self._run_rpc("acquireTableau", {
+            "tabType": tab_type,
+            "angle": angle
+        })
+        logging.info("DONE: Request to run Tableau")
+        return data
+
+    def correct_aberration(self, name: str, value=None, target=None, select=None):
+        """
+        name: e.g., 'A1'
+        value: tuple (x, y) in meters
+        target: tuple (x, y) in meters
+        select: correction tool e.g. 'fine', 'coarse', 'objective'
+        """
+        logging.info(f"Request to correct aberration: {name}")
+        params = {"name": name}
+        if value:
+            params["value"] = list(value)
+        if target:
+            params["target"] = list(target)
+        if select:
+            params["select"] = select
+
+        result = self._run_rpc("correctAberration", params)
+        logging.info(f"DONE: Correction complete for {name}")
+        return result
 
 class EDGEfilterAcquisition:
     def __init__(self, microscope):
