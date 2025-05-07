@@ -603,6 +603,19 @@ class CEOSacquisition:
         logging.info(f"DONE: Correction complete for {name}")
         return result
 
+    def measure_c1a1(self):
+        """
+        Performs a C1A1 (or B2A2WD) measurement.
+
+        Returns:
+            dict of measured aberrations
+        """
+        logging.info("Request to measure C1A1 (or B2A2WD)")
+        result = self._run_rpc("measureC1A1", {})
+        logging.info("DONE: Measurement complete")
+        return result
+
+
 class EDGEfilterAcquisition:
     def __init__(self, microscope):
         """Initialize the microscope and set up acquisition parameters."""
