@@ -1,6 +1,6 @@
 # STEM-Orchestrator : Enabling Real-Time Multimodal Data Acquisition in (Scanning transmission electron microscopes)STEM
 
-<img src="./assests/stemOrchestratorv2.png" width="300" height="300" alt="STEM Orchestrator">
+<img src="./assests/stemOrchestratorv2.png" width="500" height="123" alt="STEM Orchestrator">
 
 Why do we need STEM-Orchestrator?
 - The various hardware components[eels detector, in-situ-holders, aberration corrector etc] of a STEM system often operate in isolation and lack seamless communication.
@@ -9,3 +9,21 @@ Why do we need STEM-Orchestrator?
 Interested in contributing?
  - Please check CONTRIBUTING.md 
  - reach out
+
+
+## Known issues - trouble-shooting:
+### 1. Not seeing logging in action? 
+
+- Chect if logger is set before importing utilities
+
+ ```python
+ # 1st set the logger
+from stemOrchestrator.logging_config   import setup_logging
+data_folder  = "."
+out_path = data_folder
+setup_logging(out_path=out_path) 
+
+#Then import the utilities
+from stemOrchestrator.acquisition import TFacquisition, DMacquisition
+
+ ```
