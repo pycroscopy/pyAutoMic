@@ -1,4 +1,4 @@
-#for tfacquisition to work:
+#for TFacquisition to work:
 1. Python 3.8.17
 2. Install Autoscript-TEM : https://www.thermofisher.com/us/en/home/electron-microscopy/products/software-em-3d-vis/software-updates.html#autoscript
 3. opencv-python==4.10.0.84
