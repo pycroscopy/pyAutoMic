@@ -618,7 +618,7 @@ class CEOSacquisition:
 
 
 
-class CEOSAcquisitionTCP:
+class CEOSacquisitionTCP:
     def __init__(self, host="127.0.0.1", port=7072):
         self.host = host
         self.port = port
