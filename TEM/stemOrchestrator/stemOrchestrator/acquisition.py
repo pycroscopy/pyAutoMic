@@ -133,6 +133,18 @@ class TFacquisition:
         val = self.microscope.detectors.screen.position
         logging.info(f"DONE: The state of the screen is {val} ")
         return val
+    
+    def insert_screen(self) -> None:
+        logging.info("Request to insert the screen")
+        self.microscope.detectors.screen.insert()
+        logging.info(f"DONE: inserting the screen ")
+        pass
+
+    def retract_screen(self) -> None:
+        logging.info("Request to retract the screen")
+        self.microscope.detectors.screen.retract()
+        logging.info(f"DONE: retracting the screen ")
+        pass
 
     def query_haadf_state(self) -> str:
         logging.info("Request to query the position of the HAADF")
