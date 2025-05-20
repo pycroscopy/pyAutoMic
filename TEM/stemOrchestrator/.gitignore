@@ -189,6 +189,7 @@ config_secret.json
 
 notebooks/withoutUI/
 
+notebooks/aberrations_related/MOBO_aberration.ipynb
 
 notebooks/experiments/
 

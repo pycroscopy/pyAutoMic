@@ -153,14 +153,15 @@ class TFacquisition:
         self.microscope.optics.unblank()
         image = self.microscope.acquisition.acquire_stem_image(DetectorType.HAADF, resolution, exposure)# takes 40 seconds
         self.microscope.optics.blank()
+        img = image.data - np.min(image.data)
+        image_data = (255*(img/np.max(img))).astype(np.uint8)
         if dont_save_but_return_object: # :IDEA - to work with sidpy datasets directly
             return image, image_data
         image.save(f"HAADF_image_{current_time}")# saves the tiff
         haadf_tiff_name = f"HAADF_image_{current_time}.tiff"
         logging.info("saving HAADF image as TF which has all the metadata..also returning an array")
         # convert the image to noarray and return that as well
-        img = image.data - np.min(image.data)
-        image_data = (255*(img/np.max(img))).astype(np.uint8)
+
         # HAADF_tiff_to_png(f"HAADF_image_{current_time}.tff")
         logging.info("Done: Acquiring HAADF image - beam is blanked after acquisition - HAADF det is inserted")
 
