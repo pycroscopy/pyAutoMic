@@ -39,8 +39,8 @@ class TFacquisition:
         except Exception as e:
             logging.error(f"Failed to initialize detectors: {str(e)}")
             raise
-        logging.info("LOGGING STATE of the Microscope================================================")
-        self.query_state_of_microscope()
+        # logging.info("LOGGING STATE of the Microscope================================================")
+        # self.query_state_of_microscope()
         # Log early the state of the microscope [stage{x, y, z, A, B}, paused beam postion{b/w 0 and 1 in x and y}, screen_current]
         # self.query_vacuum_valves()
         # self.current_stage_position = self.query_stage_position()
@@ -69,6 +69,7 @@ class TFacquisition:
         FOV, screen current, 
         """
         logging.info("Request to log the state of the microscope")
+        self.query_vacuum_state()
         self.query_list_of_detectors()
         self.query_vacuum_valves()
         self.query_beam_shift_position()
@@ -85,6 +86,13 @@ class TFacquisition:
         pass
         
 
+    def query_vacuum_state(self):
+        logging.info("Request: query the vacuum of the microscope")
+        val = self.microscope.vacuum.state
+        logging.info(f"Done: vacuum of the microscope is :{val}")
+        pass
+        
+        
     def query_relevant_metadata_of_image(self, image: AdornedImage) -> None:
         logging.info("Request to query the metadata of an AdornedImage object")
 
