@@ -1,0 +1,9 @@
+###Client side
+1. Python 3.8.17
+2. pip install pyro5==5.15
+3. pip install matplotlib==3.7.5
+4. pip install ipykernel
+5. pip install jupyter
+
+###Server side - env - C:\ProgramData\Miniconda3\envs\GMS_VENV_PYTHON
+1. pip install pyro5==5.15
