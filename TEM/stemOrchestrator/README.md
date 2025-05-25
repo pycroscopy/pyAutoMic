@@ -1,4 +1,6 @@
-# STEM-Orchestrator : Enabling Real-Time Multimodal Data Acquisition in (Scanning transmission electron microscopes)STEM
+# STEM-Orchestrator : Enabling Real-Time Multimodal Data Acquisition in (Scanning transmission electron microscopes)STEM 
+
+## [Link to Preprint - https://doi.org/10.31224/4645](https://engrxiv.org/preprint/view/4645/version/6316)
 
 <img src="./assests/stemOrchestratorv2.png" width="1000" height="300" alt="STEM Orchestrator">
 
@@ -27,3 +29,19 @@ setup_logging(out_path=out_path)
 from stemOrchestrator.acquisition import TFacquisition, DMacquisition
 
  ```
+
+
+## Cite this work as
+```
+
+@Article{stemOrchestrator2025,
+  author  = "Pratiush, Utkarsh and Houston, Austin and Longo, Paolo and Geurts, Remco and Kalinin, Sergei and Duscher, Gerd",
+  title   = "stemOrchestrator: Enabling Seamless Hardware Control and High-Throughput Workflows on Electron Microscopes",
+  journal = "engRxiv",
+  year    = "2025",
+  publisher = "Engineering Archive",
+  doi     = "10.31224/4645",
+  url     = "https://doi.org/10.31224/4645",
+  keywords = "electron microscopy, instrumentation, automation"
+}
+```
