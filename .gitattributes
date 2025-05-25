@@ -1,7 +1,4 @@
-## ignore jupyter notebooks in postprocessing in the language bar on github
-
+# Ignore notebooks in language breakdown
 TEM/AutoScript/notebooks/** linguist-vendored
-
 TEM/DigitalMicrograph/Remote_notebooks/** linguist-vendored
-
 TEM/stemOrchestrator/notebooks/** linguist-vendored
