@@ -90,7 +90,7 @@ class TFacquisition:
         logging.info("Request: query the vacuum of the microscope")
         val = self.microscope.vacuum.state
         logging.info(f"Done: vacuum of the microscope is :{val}")
-        pass
+        return val
         
         
     def query_relevant_metadata_of_image(self, image: AdornedImage) -> None:
@@ -146,7 +146,7 @@ class TFacquisition:
         logging.info("Request to insert the screen")
         self.microscope.detectors.screen.insert()
         logging.info(f"DONE: inserting the screen ")
-        pass
+        return 
 
     def retract_screen(self) -> None:
         logging.info("Request to retract the screen")
