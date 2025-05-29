@@ -122,7 +122,7 @@ def activateCamera(height=200):
 	bin = 1
 	# kproc = DM.GetCameraUnprocessedEnum()
 	# kproc = DM.GetCameraGainNormalizedEnum()
-        kproc = 3 # corresponds to processed spectrum 
+    kproc = 3 # corresponds to processed spectrum 
 	preImg = cam.CreateImageForAcquire( bin, bin, kproc, 1024-height, 0, 1024+height, 2048)
 	return preImg, cam, kproc
 
