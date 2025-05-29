@@ -182,6 +182,7 @@ config_secret.json
 *.pth
 *.yaml
 *.npy
+*.mp4
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 # Allow requirements
@@ -200,3 +201,4 @@ notebooks/spectrum_related/manual_particle*
 notebooks/SAM_related/part*/
 *.poscar
 
+notebooks/aberrations_related/defocus_grid_data.ipynb
