@@ -166,7 +166,7 @@ class TFacquisition:
         logging.info(f"DONE: The state of the CETA is {val} ")
         return val
 
-    def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size = False, dont_save_but_return_object = False) -> Tuple[np.ndarray, str, Optional[Tuple]]:
+    def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size = False, dont_save_but_return_object = False, folder_path = "./") -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire HAADF image."""
         logging.info("Acquiring HAADF image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -177,7 +177,7 @@ class TFacquisition:
         image_data = (255*(img/np.max(img))).astype(np.uint8)
         if dont_save_but_return_object: # :IDEA - to work with sidpy datasets directly
             return image, image_data
-        image.save(f"HAADF_image_{current_time}")# saves the tiff
+        image.save(f"{folder_path}HAADF_image_{current_time}")# saves the tiff
         haadf_tiff_name = f"HAADF_image_{current_time}.tiff"
         logging.info("saving HAADF image as TF which has all the metadata..also returning an array")
         # convert the image to noarray and return that as well

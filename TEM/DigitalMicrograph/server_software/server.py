@@ -115,13 +115,14 @@ def get_scanned_image(size=512, pixelTime=10, front_image = False):
             return array
 
 
-def activateCamera(height=200):
+def activateCamera(height=200): 
 	cam = DM.GetActiveCamera()
 	cam.PrepareForAcquire()
 	height = int(height/2)
 	bin = 1
-	kproc = DM.GetCameraUnprocessedEnum()
-	kproc = DM.GetCameraGainNormalizedEnum()
+	# kproc = DM.GetCameraUnprocessedEnum()
+	# kproc = DM.GetCameraGainNormalizedEnum()
+    kproc = 3 # corresponds to processed spectrum 
 	preImg = cam.CreateImageForAcquire( bin, bin, kproc, 1024-height, 0, 1024+height, 2048)
 	return preImg, cam, kproc
 
@@ -135,6 +136,10 @@ def acquireCamera(cam, preImg, kproc, exposure=0.1, height=200):
 	dmImgData = preImg.GetNumArray()
 	return dmImgData
 
+def setEnergyOffset(offset = 0):
+    script = f"IFSetEnergyLoss({offset}); IFWaitForFilter( )"
+    DM.ExecuteScriptString(script)
+    return
 
 
 def closeCamera(preImg):
@@ -203,11 +208,18 @@ class ArrayServer(object):
         self.preImg, self.cam, self.kproc = activateCamera(height=height)
         return
 
+    def set_energy_Offset(self, offset = 0):
+        """ Set the energy offset 
+        """
+        setEnergyOffset(offset = offset)
+        return
+
     def acquire_camera(self, exposure):
         """Used in eels acquisiton
         """
         self.dmImgData = acquireCamera(self.cam, self.preImg, self.kproc, exposure= exposure, height=height)
         return
+
 
     def get_eels(self, dummy = False):
         """Get eels from the camera
