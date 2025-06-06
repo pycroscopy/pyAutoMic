@@ -1,5 +1,25 @@
+--------------------------------------------
+update - date 5 june 2025 for Autoscript 1.12
+
+install python > 3.11
+install all the client  wheels
+then:
+pillow
+numpy
+matplotlib
+colorama
+opencv_python
+lxml
+defusedxml
+h5py
+autoscript_core
+autoscript_tem_microscope_client
+autoscript_tem_microscope_client_tests
+autoscript_tem_toolkit
+thermoscientific_logging
+---------------------------------------------
 #for TFacquisition to work:
-1. Python 3.8.17 - note AS-3.12 - changes to python > 3.10
+1. Python 3.8.17 - note AS-3.12 - changes to python > 3.11
 2. Install Autoscript-TEM : https://www.thermofisher.com/us/en/home/electron-microscopy/products/software-em-3d-vis/software-updates.html#autoscript
 3. opencv-python==4.10.0.84
 4. llvmlite==0.41.1
