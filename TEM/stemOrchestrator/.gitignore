@@ -135,7 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+as-1.12-py-3.11/
 # Spyder project settings
 .spyderproject
 .spyproject
