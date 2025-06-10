@@ -69,6 +69,7 @@ class TFacquisition:
         FOV, screen current, 
         """
         logging.info("Request to log the state of the microscope")
+        self.query_server_address()
         self.query_vacuum_state()
         self.query_list_of_detectors()
         self.query_vacuum_valves()
@@ -84,6 +85,12 @@ class TFacquisition:
         self.query_stage_position()
         logging.info("DONE: quering the state of microscope")
         pass
+
+    def query_server_address(self):
+        logging.info("Request: query the address of the microscope")
+        val = self.microscope.server_host
+        logging.info(f"Done: address of the microscope is :{val}")
+        return val
         
 
     def query_vacuum_state(self):
