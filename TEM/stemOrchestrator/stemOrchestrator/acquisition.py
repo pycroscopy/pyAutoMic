@@ -93,6 +93,18 @@ class TFacquisition:
         return val
         
 
+    def query_server_version(self):
+        logging.info("Request: query the version of server")
+        val = self.microscope.service.autoscript.server.version
+        logging.info(f"Done: version of the server is :{val}")
+        return val
+
+    def query_client_version(self):
+        logging.info("Request: query the version of client")
+        val = self.microscope.service.autoscript.client.version
+        logging.info(f"Done: version of the client is :{val}")
+        return val
+        
     def query_vacuum_state(self):
         logging.info("Request: query the vacuum of the microscope")
         val = self.microscope.vacuum.state
