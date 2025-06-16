@@ -189,9 +189,9 @@ class TFacquisition:
         """Acquire HAADF image."""
         logging.info("Acquiring HAADF image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.microscope.optics.unblank()
+        self.unblank_beam()
         image = self.microscope.acquisition.acquire_stem_image(DetectorType.HAADF, resolution, exposure)# takes 40 seconds
-        self.microscope.optics.blank()
+        self.blank_beam()
         img = image.data - np.min(image.data)
         image_data = (255*(img/np.max(img))).astype(np.uint8)
         if dont_save_but_return_object: # :IDEA - to work with sidpy datasets directly
@@ -226,9 +226,9 @@ class TFacquisition:
             pass
         logging.info(f"Acquiring {camera} image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.microscope.optics.unblank()
+        self.unblank_beam()
         image = self.microscope.acquisition.acquire_camera_image(camera, resolution, exposure)# takes 40 seconds
-        self.microscope.optics.blank()
+        self.blank_beam()
         self.ceta_cam.retract()
         if dont_save_but_return_object: # :IDEA - to work with sidpy datasets directly
             return image, image_data
@@ -439,26 +439,46 @@ class TFacquisition:
         logging.info(f"Done: beam shift(not paused beam) to {self.current_beam_shift_pos}")
         return 
         
+
+
     def query_is_beam_blanked(self) -> bool:
-        # check if beam is blanked or not
-        val = self.microscope.optics.is_beam_blanked
-        logging.info(f"Checking: Is beam blanked?-- current status: {val}")
-        return val
-    
+        try:
+            # Try using the old version first
+            val = self.microscope.optics.is_beam_blanked
+            logging.info(f"Beam blanked status (old method): {val}")
+            return val
+        except (AttributeError, Warning, ValueError) as e:
+            logging.warning(f"Old method failed: {e}. Trying blanker instead.")
+            val = self.microscope.optics.blanker.is_beam_blanked
+            logging.info(f"Beam blanked status (fallback to blanker): {val}")
+            return val
+
+
     def blank_beam(self) -> None:
-        # Perform electron beam blanking
-        logging.info("Performing beam blanking")
-        self.microscope.optics.blank()
-        logging.info("DONE -- beam blanking")
-        return 
+        try:
+            # Try the old method first
+            logging.info("Performing beam blanking (old method)")
+            val = self.microscope.optics.blank()
+            logging.info("DONE -- beam blanking", val)
+        except (AttributeError, Warning, ValueError) as e:
+            logging.info("Performing beam blanking (fallback to blanker)")
+            self.microscope.optics.blanker.blank()
+            logging.info("DONE -- beam blanking (fallback method)")
 
     def unblank_beam(self) -> None:
-        # Perform electron beam UNblanking
-        logging.info("Performing beam UNblanking")
-        self.microscope.optics.unblank()
-        logging.info("DONE -- beam UNblanking")
-        return 
-    
+        try:
+            # Try the old method first
+            logging.info("Performing beam UNblanking (old method)")
+            self.microscope.optics.unblank()
+            logging.info("DONE -- beam UNblanking")
+        except (AttributeError, Warning, ValueError) as e:
+            logging.warning(f"Old method failed: {e}. Trying blanker instead.")
+            # Fallback to blanker
+            logging.info("Performing beam UNblanking (fallback to blanker)")
+            self.microscope.optics.blanker.unblank()
+            logging.info("DONE -- beam UNblanking (fallback method)")
+ 
+
     def query_vacuum_valves(self) -> str:
         # Check status of the column valves
         logging.info("Request: Checking for vacuum valves -- current status")
