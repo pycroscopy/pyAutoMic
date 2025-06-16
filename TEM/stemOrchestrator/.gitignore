@@ -202,3 +202,5 @@ notebooks/SAM_related/part*/
 *.poscar
 
 notebooks/aberrations_related/defocus_grid_data.ipynb
+
+notebooks/WD

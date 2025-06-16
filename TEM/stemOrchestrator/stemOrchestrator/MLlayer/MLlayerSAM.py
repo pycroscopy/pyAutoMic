@@ -38,21 +38,44 @@ def initialize_sam_model(model_type: str, checkpoint_path: str, device: torch.de
     return sam, mask_generator
 
 def preprocess_image(image_data: np.ndarray) -> np.ndarray:
-    """Convert grayscale image to RGB format."""
-    rgb_image = np.stack((image_data,) * 3, axis=-1)
+    """Convert grayscale image to RGB format and ensure correct dtype."""
+    if not isinstance(image_data, np.ndarray):
+        raise TypeError("Input must be a NumPy array")
+
+    if image_data.ndim != 2:  # Ensure it's a grayscale image (2D array)
+        raise ValueError("Input image must be a 2D grayscale array")
+
+    rgb_image = np.stack((image_data,) * 3, axis=-1).astype(np.float32) / 255.0  # Normalize to [0,1]
     return rgb_image
 
 def generate_and_save_masks(mask_generator: Any, img_np: np.ndarray, output_path: str) -> List[Dict[str, Any]]:
-    """Generate masks using SAM and save to disk."""
-    print("Generating masks...")
-    masks = mask_generator.generate(img_np)
-    print(f"Number of masks generated: {len(masks)}")
+    """Generate masks using SAM, validate input, handle errors, and save to disk."""
     
-    # Save masks to disk
-    with open(output_path, 'wb') as f:
-        pickle.dump(masks, f)
+    # Validate inputs
+    if not isinstance(img_np, np.ndarray):
+        raise TypeError("img_np must be a NumPy array")
     
-    return masks
+    if img_np.ndim not in (2, 3):  # Check for grayscale (2D) or RGB (3D)
+        raise ValueError("img_np must be a 2D grayscale or 3D RGB image array")
+    
+    try:
+        print("Generating masks...")
+        masks = mask_generator.generate(img_np)
+
+        if not masks or not isinstance(masks, list):
+            raise ValueError("Mask generation failed or returned an unexpected format")
+
+        print(f"Number of masks generated: {len(masks)}")
+
+        # Save masks to disk
+        with open(output_path, 'wb') as f:
+            pickle.dump(masks, f)
+
+        return masks
+
+    except Exception as e:
+        print(f"Error during mask generation: {e}")
+        return []
 
 def create_visualization_with_masks(img_np: np.ndarray, masks: List[Dict[str, Any]]) -> Tuple[np.ndarray, List[Tuple[float, float, int]]]:
     """Create an image with colored masks and return centroids."""
