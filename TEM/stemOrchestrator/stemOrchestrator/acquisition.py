@@ -458,8 +458,8 @@ class TFacquisition:
         try:
             # Try the old method first
             logging.info("Performing beam blanking (old method)")
-            val = self.microscope.optics.blank()
-            logging.info("DONE -- beam blanking", val)
+            self.microscope.optics.blank()
+            logging.info("DONE -- beam blanking")
         except (AttributeError, Warning, ValueError) as e:
             logging.info("Performing beam blanking (fallback to blanker)")
             self.microscope.optics.blanker.blank()
