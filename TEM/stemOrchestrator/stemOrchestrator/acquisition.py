@@ -185,9 +185,16 @@ class TFacquisition:
         logging.info(f"DONE: The state of the CETA is {val} ")
         return val
 
-    def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size = False, dont_save_but_return_object = False, folder_path = "./") -> Tuple[np.ndarray, str, Optional[Tuple]]:
+    def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size: bool = False, dont_save_but_return_object: bool = False, return_adorned_object: bool = False, folder_path = "./") -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire HAADF image."""
         logging.info("Acquiring HAADF image.")
+        if exposure > 2e-6:
+            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
+            if confirm.lower() == 'yes':
+                print("Proceeding...")
+            else:
+                print("Operation canceled.")
+                return
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.unblank_beam()
         image = self.microscope.acquisition.acquire_stem_image(DetectorType.HAADF, resolution, exposure)# takes 40 seconds
@@ -203,6 +210,10 @@ class TFacquisition:
 
         # HAADF_tiff_to_png(f"HAADF_image_{current_time}.tff")
         logging.info("Done: Acquiring HAADF image - beam is blanked after acquisition - HAADF det is inserted")
+
+        if return_pixel_size and return_adorned_object:
+            pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
+            return image, image_data, haadf_tiff_name, pixel_size_tuple
 
         if return_pixel_size:
             pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
