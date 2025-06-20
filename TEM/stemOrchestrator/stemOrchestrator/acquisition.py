@@ -221,46 +221,66 @@ class TFacquisition:
         
         return image_data, haadf_tiff_name
 
-    def acquire_ceta_or_flucam(self, exposure: float = 0.1, resolution: int = 4096, camera : str = "ceta", dont_save_but_return_object = False) -> Tuple[np.ndarray, str, Optional[Tuple]]:
-        """Acquire CETA image.
-        Args:
-            exposure : float : 0.2 means 0.2 seconds i.e 200ms
-        
-        """
+    def acquire_ceta_or_flucam(
+        self,
+        exposure: float = 0.1,
+        resolution: int = 4096,
+        camera: str = "ceta",
+        dont_save_but_return_object: bool = False,
+        return_adorned_object: bool = False,
+        return_pixel_size: bool = False,
+        folder_path: str = "./"
+    ) -> Tuple[np.ndarray, str, Optional[Tuple]]:
+        """Acquire CETA or FLUCAM image."""
+        if exposure > 0.5:
+            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
+            if confirm.lower() != 'yes':
+                print("Operation canceled.")
+                return
+
         if camera == "ceta":
-            camera = CameraType.BM_CETA
+            cam_type = CameraType.BM_CETA
             self.ceta_cam.insert()
         elif camera == "flucam":
-            camera = CameraType.FLUCAM
+            cam_type = CameraType.FLUCAM
             self.flu_cam.insert()
         else:
-            pass
+            raise ValueError(f"Unsupported camera type: {camera}")
+
         logging.info(f"Acquiring {camera} image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.unblank_beam()
-        image = self.microscope.acquisition.acquire_camera_image(camera, resolution, exposure)# takes 40 seconds
+        image = self.microscope.acquisition.acquire_camera_image(cam_type, resolution, exposure)
         self.blank_beam()
         self.ceta_cam.retract()
-        if dont_save_but_return_object: # :IDEA - to work with sidpy datasets directly
-            return image, image_data
-        image.save(f"{camera}_image_{current_time}")# saves the tiff
-        ceta_tiff_name = f"{camera}_image_{current_time}.tiff"
-        logging.info(f"saving {camera} image as TF which has all the metadata..also returning an array")
-        # convert the image to noarray and return that as well
-        img = image.data - np.min(image.data)
-        image_data = (255*(img/np.max(img))).astype(np.uint8)
-        # n = ceta_image_data.shape[0]# 4096
-        # center_half = ceta_image_data[n // 4: 3 * n // 4, n // 4: 3 * n // 4]
-        # center_quarter = ceta_image_data[n // 2: 3 * n // 4, n // 2: 3 * n // 4]
-        # center_quarter = ceta_image_data[1024:-1024, 1024:-1024]
 
-        # CETA_tiff_to_png(f"CETA_image_{current_time}.tff")
-        logging.info(f"Done: Acquiring {camera} image. Beam is blanked and ceta detector is retracted")
-        pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
+        img = image.data - np.min(image.data)
+        image_data = (255 * (img / np.max(img))).astype(np.uint8)
+        image_name = f"{camera}_image_{current_time}.tiff"
+
+        if dont_save_but_return_object:
+            return image, image_data
+
+        image.save(f"{folder_path}{image_name}")
+        logging.info(f"Saved {camera} image with metadata to {image_name}")
+
+        if return_pixel_size and return_adorned_object:
+            pixel_size_tuple = (
+                image.metadata.binary_result.pixel_size.x,
+                image.metadata.binary_result.pixel_size.y
+            )
+            return image, image_data, image_name, pixel_size_tuple
+
+        if return_pixel_size:
+            pixel_size_tuple = (
+                image.metadata.binary_result.pixel_size.x,
+                image.metadata.binary_result.pixel_size.y
+            )
+            return image_data, image_name, pixel_size_tuple
+
+        return image_data, image_name
 
         
-        return image_data, ceta_tiff_name
-
     def query_defocus(self)-> str:
         logging.info("Request to query the defocus value")
         val = self.microscope
