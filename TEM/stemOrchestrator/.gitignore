@@ -183,6 +183,9 @@ config_secret.json
 *.yaml
 *.npy
 *.mp4
+*.csv
+*.jpeg
+*.jpg
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 # Allow requirements
