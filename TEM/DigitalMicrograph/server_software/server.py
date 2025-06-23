@@ -35,9 +35,6 @@ def get_beam_position():
     return x, y
     
 
-
-
-
 def set_ds_parameter(size=512, pixelTime=30):
 	rotation = 0
 	lineSync = False
@@ -63,28 +60,27 @@ def get_ds_step_params(image):
     Returns:    
             List: [digiscan_offset_in_x, digiscan_offset_in_y, x_ds_step, y_ds_step]
     """
-    global ds_parameters
-    # image = DM.GetFrontImage()
     im_tags = image.GetTagGroup()
-    
+    x_offset, x_ds_center, x_ds_step = 0, 0, 0
+    y_offset, y_ds_center, y_ds_step = 0, 0, 0
+
     for group in im_tags:
         if group.__class__.__name__ == 'Py_TagGroup':
-            ds_tag_group, x_offset = group.GetTagAsFloat('Horizontal DS Offset')
-            if ds_tag_group:
-                for tag in group:
-                    print(tag)
-                    _, x_offset = group.GetTagAsFloat('Horizontal DS Offset')
-                    _, x_ds_center = group.GetTagAsFloat('Horizontal Image Center')
-                    _, x_ds_step = group.GetTagAsFloat('Horizontal Spacing')
-                    _, y_offset = group.GetTagAsFloat('Vertical DS Offset')
-                    _, y_ds_step = group.GetTagAsFloat('Vertical Spacing')
-                    _, y_ds_center = group.GetTagAsFloat('Vertical Image Center')
-                break# terminate when found the tag group
-            
-    x_ds_offset = x_offset-x_ds_center*x_ds_step
-    y_ds_offset = y_offset-y_ds_center*y_ds_step
-    ds_parameters = [x_ds_offset, y_ds_offset, x_ds_step, y_ds_step]
-    return ds_parameters
+            # Check if this is the DS tag group by trying to get a known tag
+            ds_tag_group_found, _ = group.GetTagAsFloat('Horizontal DS Offset')
+            if ds_tag_group_found:
+                _, x_offset = group.GetTagAsFloat('Horizontal DS Offset')
+                _, x_ds_center = group.GetTagAsFloat('Horizontal Image Center')
+                _, x_ds_step = group.GetTagAsFloat('Horizontal Spacing')
+                _, y_offset = group.GetTagAsFloat('Vertical DS Offset')
+                _, y_ds_step = group.GetTagAsFloat('Vertical Spacing')
+                _, y_ds_center = group.GetTagAsFloat('Vertical Image Center')
+                break # Terminate when the tag group is found and parameters are extracted
+
+    x_ds_offset = x_offset - x_ds_center * x_ds_step
+    y_ds_offset = y_offset - y_ds_center * y_ds_step
+
+    return [x_ds_offset, y_ds_offset, x_ds_step, y_ds_step]
 
 
 def get_scanned_image(size=512, pixelTime=10, front_image = False):
