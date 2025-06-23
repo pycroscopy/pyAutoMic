@@ -12,28 +12,32 @@ try:
 except ImportError:
     DEPENDENCIES_INSTALLED = False
 
+import time
+
 # TODO: add: discretizations of x values
 #       add: min or max -- sign : goal is for non-programmers
 #       add: scaling the data dfed to model b/w 0 to 1
 #       minim comes from the minim of predictive distribution
 class Tune1d:
-    def __init__(self, variable, python_command, num_gp_steps, bounds, seed_pt=None):
+    def __init__(self, variable, python_command, old_x, old_y, num_gp_steps, bounds, seed_pt=None):
         if not DEPENDENCIES_INSTALLED:
             raise ImportError("Required dependencies (torch, botorch, gpytorch) are not installed. "
                               "Please install them to use this module.")
         self.variable = variable
         self.python_command = python_command
+        self.old_x, self.old_y = old_x, old_y 
         self.num_gp_steps = num_gp_steps
         self.bounds = bounds
         self.seed_pt = seed_pt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         
         if seed_pt is not None:
             torch.manual_seed(seed_pt)
             np.random.seed(seed_pt)
 
     def _acquire_data(self, x):
-        result = self.python_command(x.item())
+        result = self.python_command(self.old_x, self.old_y, x.item())
         return result
 
 
@@ -62,6 +66,7 @@ class Tune1d:
             model = self._initialize_model(train_x, train_y)
             new_x = self._optimize_acquisition_function(model, train_y, self.bounds).to(self.device)
             new_y = torch.tensor([[self._acquire_data(new_x[0])]], dtype=dtype).to(self.device)
+            time.sleep(1)
             
             train_x = torch.cat([train_x, new_x])
             train_y = torch.cat([train_y, new_y])
