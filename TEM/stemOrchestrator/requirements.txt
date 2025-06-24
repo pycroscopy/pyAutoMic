@@ -37,6 +37,7 @@ thermoscientific_logging
 1. pip install google-genai
 
 #for BO workflows to work
+0. numpy==1.26
 1. botorch==0.8.5
 2. gpytorch==1.10
 3. torch==2.2.2
