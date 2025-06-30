@@ -1,23 +1,28 @@
 # Author credits - Utkarsh Pratiush <utkarshp1161@gmail.com>
 
 import logging
-import Pyro5.api
-from autoscript_tem_microscope_client import TemMicroscopeClient
-from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode, EdsDetectorType, ExposureTimeType
-from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage, EdsAcquisitionSettings, AdornedSpectrum
-from typing import Tuple, Dict, List, Optional, Union
+import copy
+import json
+import logging
+import socket
+from typing import Tuple, Dict, List, Optional, Union, Sequence
+
 import numpy as np
 from datetime import datetime
 import Pyro5
-import copy
-from stemOrchestrator.simulation import DMtwin
-import json
-import logging
 from twisted.internet import reactor, defer
 from twisted.protocols.basic import NetstringReceiver
 from twisted.internet.protocol import ReconnectingClientFactory
+import Pyro5.api
+
+from autoscript_tem_microscope_client import TemMicroscopeClient
+from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode, EdsDetectorType, ExposureTimeType
+from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage, EdsAcquisitionSettings, AdornedSpectrum,  StemAcquisitionSettings
+import autoscript_tem_toolkit.vision as vision_toolkit
+
+from stemOrchestrator.simulation import DMtwin
 from stemOrchestrator.hardware import _CEOSFactory
-import socket
+
 
 class TFacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
@@ -221,6 +226,122 @@ class TFacquisition:
         
         return image_data, haadf_tiff_name
 
+
+    def acquire_bf(
+        self,
+        exposure: float = 40e-9,
+        resolution: int = 512,
+        return_pixel_size: bool = False,
+        dont_save_but_return_object: bool = False,
+        return_adorned_object: bool = False,
+        folder_path: str = "./"
+    ) -> Optional[Tuple[np.ndarray, str, Optional[Tuple[float, float]]]]:
+        """Acquire Bright Field (BF) STEM image."""
+
+        logging.info("Acquiring BF image.")
+
+        if exposure > 2e-6:
+            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
+            if confirm.lower() != 'yes':
+                print("Operation canceled.")
+                return None
+            print("Proceeding...")
+
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.unblank_beam()
+
+        bf_image = self.microscope.acquisition.acquire_stem_image(DetectorType.BF_S, resolution, exposure)
+        
+        self.blank_beam()
+
+        # Normalize image data
+        img = bf_image.data - np.min(bf_image.data)
+        image_data = (255 * (img / np.max(img))).astype(np.uint8)
+
+        if dont_save_but_return_object:
+            return bf_image, image_data
+
+        bf_filename = f"BF_image_{current_time}.tiff"
+        bf_image.save(f"{folder_path}/{bf_filename}")
+
+        logging.info("Saved BF image as TIFF with metadata.")
+        logging.info("Done: Acquiring BF image — beam blanked, BF detector disengaged.")
+
+        if return_pixel_size:
+            pixel_size_tuple = (
+                bf_image.metadata.binary_result.pixel_size.x,
+                bf_image.metadata.binary_result.pixel_size.y
+            )
+            if return_adorned_object:
+                return bf_image, image_data, bf_filename, pixel_size_tuple
+            return image_data, bf_filename, pixel_size_tuple
+
+        return image_data, bf_filename
+    
+    def acquire_haadf_bf(
+        self,
+        exposure: float = 40e-9,
+        resolution: int = 512,
+        return_pixel_size: bool = False,
+        dont_save_but_return_object: bool = False,
+        return_adorned_object: bool = False,
+        folder_path: str = "./"
+    ) -> Optional[Tuple[np.ndarray, np.ndarray, str, Optional[Tuple[float, float]]]]:
+        """Acquire HAADF and BF STEM images."""
+
+        logging.info("Acquiring HAADF and BF images.")
+
+        if exposure > 2e-6:
+            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
+            if confirm.lower() != 'yes':
+                print("Operation canceled.")
+                return None
+            print("Proceeding...")
+
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.unblank_beam()
+
+        settings = StemAcquisitionSettings(
+            exposure,
+            detector_types=[DetectorType.HAADF, DetectorType.BF_S],
+            size=resolution
+        )
+
+        images = self.microscope.acquisition.acquire_stem_images_advanced(settings)
+        self.blank_beam()
+
+        haadf_image, bf_image = images[0], images[1]
+
+        def normalize(image):
+            img = image.data - np.min(image.data)
+            return (255 * (img / np.max(img))).astype(np.uint8)
+
+        haadf_data = normalize(haadf_image)
+        bf_data = normalize(bf_image)
+
+        if dont_save_but_return_object:
+            return haadf_image, bf_image, haadf_data, bf_data
+
+        # Save HAADF and BF images
+        haadf_filename = f"HAADF_image_{current_time}.tiff"
+        bf_filename = f"BF_image_{current_time}.tiff"
+        haadf_image.save(f"{folder_path}/{haadf_filename}")
+        bf_image.save(f"{folder_path}/{bf_filename}")
+
+        logging.info("Saved HAADF and BF images as TIFFs with metadata.")
+        logging.info("Beam acquisition complete. Detectors are now safely disengaged.")
+
+        if return_pixel_size:
+            pixel_size_tuple = (
+                haadf_image.metadata.binary_result.pixel_size.x,
+                haadf_image.metadata.binary_result.pixel_size.y
+            )
+            if return_adorned_object:
+                return haadf_image, bf_image, haadf_data, bf_data, haadf_filename, bf_filename, pixel_size_tuple
+            return haadf_data, bf_data, haadf_filename, bf_filename, pixel_size_tuple
+
+        return haadf_data, bf_data, haadf_filename, bf_filename
+    
     def acquire_ceta_or_flucam(
         self,
         exposure: float = 0.1,
@@ -280,7 +401,28 @@ class TFacquisition:
 
         return image_data, image_name
 
-        
+    def vt_plot_image(self, image: AdornedImage, add_scale_bar: bool = True) -> None:
+        logging.info("Request to invoke vision toolkit to plot an Adorned image")
+        image_with_scale_bar = self.vt_add_scale_bar(image)
+        vision_toolkit.plot_image(image_with_scale_bar)
+        logging.info(f"DONE: Plotting  ")
+        return 
+
+    def vt_plot_images(self, images: Sequence[AdornedImage],  add_scale_bar: bool = True) -> None:
+        logging.info("Request to invoke vision toolkit to plot an Adorned image's")
+        images_with_scale_bar = [self.vt_add_scale_bar(i) for i in images ]
+        vision_toolkit.plot_images(images_with_scale_bar)
+        logging.info(f"DONE: Plotting  ")
+        return 
+    
+    def vt_add_scale_bar(self, image: AdornedImage) -> None:
+        logging.info("Request to invoke vision toolkit to add scalebar")
+        logging.info("make sure the scrip[t has access to arial.ttf font")
+        print("make sure the scrip[t has access to arial.ttf font")
+        image = vision_toolkit.add_scale_bar(image)
+        logging.info(f"DONE: added scalebar to the image")
+        return image
+
     def query_defocus(self)-> str:
         logging.info("Request to query the defocus value")
         val = self.microscope
