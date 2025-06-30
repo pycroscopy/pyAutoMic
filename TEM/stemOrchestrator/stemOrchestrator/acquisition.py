@@ -613,8 +613,6 @@ class TFacquisition:
         logging.info(f"Done: beam shift(not paused beam) to {self.current_beam_shift_pos}")
         return 
         
-
-
     def query_is_beam_blanked(self) -> bool:
         try:
             # Try using the old version first
@@ -626,7 +624,6 @@ class TFacquisition:
             val = self.microscope.optics.blanker.is_beam_blanked
             logging.info(f"Beam blanked status (fallback to blanker): {val}")
             return val
-
 
     def blank_beam(self) -> None:
         try:
@@ -652,7 +649,6 @@ class TFacquisition:
             self.microscope.optics.blanker.unblank()
             logging.info("DONE -- beam UNblanking (fallback method)")
  
-
     def query_vacuum_valves(self) -> str:
         # Check status of the column valves
         logging.info("Request: Checking for vacuum valves -- current status")
