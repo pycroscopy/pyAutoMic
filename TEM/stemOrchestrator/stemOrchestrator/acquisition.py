@@ -774,8 +774,45 @@ class TFacquisition:
         return image_data, stage_positions
         
 
+    
+    def jog_stage_or_piezoStage(self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), piezo: bool = False) -> str:
+        logging.info("Request to jog the stage/piezo")
+        if piezo :
+            logging.info("Piezo mode")
+            if not self.microscope.specimen.piezo_stage.is_enabled:
+                logging.info("peizo stage not enabled --- enabling")
+                self.microscope.specimen.piezo_stage.enable
+                logging.info(f"strting to move the piezo stage with velocity{stage_vel}")
+                self.microscope.specimen.piezo_stage.start_jogging(stage_vel)
+            else:
+                logging.info(f"strting to move the piezo stage with velocity{stage_vel}")
+                self.microscope.specimen.piezo_stage.start_jogging(stage_vel)
+
+        else:
+                logging.info(f"strting to move the stage with velocity{stage_vel}")
+                self.microscope.specimen.stage.start_jogging(stage_vel)
 
 
+        logging.info("DONE: stage/peizo_stage is moving dont forget to stop it if needed")
+        print("stage/peizo_stage is moving dont forget to stop it if needed")
+        return 
+    
+    def stop_jog_stage_or_piezoStage(self, piezo: bool = False) -> str:
+        logging.info("Request to stop the stage/piezo_stage")
+        if piezo :
+            logging.info("Piezo mode")
+            if not self.microscope.specimen.piezo_stage.is_moving:
+                self.microscope.specimen.piezo_stage.stop()
+            else:
+                logging.info(f"piezo is not moving in the first place")
+
+        else:
+                self.microscope.specimen.stage.stop_jogging()
+
+
+        logging.info("DONE: stage/peizo_stage is stopped moving")
+        print("stage/peizo_stage has stopped moving")
+        return 
 
 class DMacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
