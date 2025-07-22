@@ -194,7 +194,7 @@ class TFacquisition:
     def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size: bool = False, dont_save_but_return_object: bool = False, return_adorned_object: bool = False, folder_path = "./") -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire HAADF image."""
         logging.info("Acquiring HAADF image.")
-        if exposure > 2e-6:
+        if exposure > 10e-6:
             confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
             if confirm.lower() == 'yes':
                 print("Proceeding...")
@@ -241,7 +241,7 @@ class TFacquisition:
 
         logging.info("Acquiring BF image.")
 
-        if exposure > 2e-6:
+        if exposure > 10e-6:
             confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
             if confirm.lower() != 'yes':
                 print("Operation canceled.")
