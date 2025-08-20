@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 import socket
+import time
 from typing import Tuple, Dict, List, Optional, Union, Sequence
 
 import numpy as np
@@ -17,7 +18,7 @@ import Pyro5.api
 
 from autoscript_tem_microscope_client import TemMicroscopeClient
 from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode, EdsDetectorType, ExposureTimeType
-from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage, EdsAcquisitionSettings, AdornedSpectrum,  StemAcquisitionSettings
+from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage, EdsAcquisitionSettings, AdornedSpectrum,  StemAcquisitionSettings, StageVelocity
 import autoscript_tem_toolkit.vision as vision_toolkit
 
 from stemOrchestrator.simulation import DMtwin
@@ -193,7 +194,7 @@ class TFacquisition:
     def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size: bool = False, dont_save_but_return_object: bool = False, return_adorned_object: bool = False, folder_path = "./") -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire HAADF image."""
         logging.info("Acquiring HAADF image.")
-        if exposure > 2e-6:
+        if exposure > 10e-6:
             confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
             if confirm.lower() == 'yes':
                 print("Proceeding...")
@@ -240,7 +241,7 @@ class TFacquisition:
 
         logging.info("Acquiring BF image.")
 
-        if exposure > 2e-6:
+        if exposure > 10e-6:
             confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
             if confirm.lower() != 'yes':
                 print("Operation canceled.")
@@ -612,8 +613,6 @@ class TFacquisition:
         logging.info(f"Done: beam shift(not paused beam) to {self.current_beam_shift_pos}")
         return 
         
-
-
     def query_is_beam_blanked(self) -> bool:
         try:
             # Try using the old version first
@@ -625,7 +624,6 @@ class TFacquisition:
             val = self.microscope.optics.blanker.is_beam_blanked
             logging.info(f"Beam blanked status (fallback to blanker): {val}")
             return val
-
 
     def blank_beam(self) -> None:
         try:
@@ -651,7 +649,6 @@ class TFacquisition:
             self.microscope.optics.blanker.unblank()
             logging.info("DONE -- beam UNblanking (fallback method)")
  
-
     def query_vacuum_valves(self) -> str:
         # Check status of the column valves
         logging.info("Request: Checking for vacuum valves -- current status")
@@ -716,6 +713,106 @@ class TFacquisition:
         logging.info(f"FOV is now set")
         return
 
+    def jog_and_capture_with_metrics(self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), steps: int = 1, seconds_per_step: int = 2, resolution: int = 512,  exposure: float = 200e-9, min_steps: int = 4, max_decline_counter: int = 1) -> str:
+        # trick: better to have lower stage velocity and higher numbre of steps for more controlled stage movement 
+        # have the scan rotation to 0 
+        logging.info("Request to jog the stage and store haadf and stage position.")
+        image_data = []
+        stage_positions = []
+
+        decline_counter = 0
+        previous_metric = None
+        self.microscope.specimen.stage.start_jogging(stage_vel)
+        logging.info("jogging of stage started")
+        for step in range(steps):
+            print(f"\nStep {step + 1} of {steps}")
+
+            # Jog the stage
+            
+            time.sleep(seconds_per_step)
+            
+
+            # Record current Z position
+            pos = self.query_stage_position()
+            stage_positions.append(pos)
+
+            # Acquire HAADF image
+            image, _, _, _ = self.acquire_haadf(
+                exposure=exposure, resolution=resolution,
+                return_pixel_size=True, return_adorned_object=True
+            )
+
+            # Normalize image
+            img_data = image.data if isinstance(image, AdornedImage) else image
+            img_min = np.min(img_data)
+            img_max = np.max(img_data)
+            normalized_img = (img_data - img_min) / (img_max - img_min + 1e-9)
+
+            # Compute σ/μ
+            mu = np.mean(normalized_img)
+            sigma = np.std(normalized_img)
+            metric = sigma / mu if mu != 0 else 0
+
+            print(f"μ: {mu:.4f}, σ: {sigma:.4f}, σ/μ: {metric:.4f}")
+            image_data.append((image, metric))
+
+            # Track decline
+            if previous_metric is not None:
+                if metric < previous_metric:
+                    decline_counter += 1
+                    print(f"Decline detected. Count = {decline_counter}")
+                else:
+                    decline_counter = 0
+
+                if  step > min_steps and decline_counter >= max_decline_counter:
+                    print(" Metric declined 3 times in a row. Stopping early.")
+                    self.microscope.specimen.stage.stop_jogging()
+                    break
+
+            previous_metric = metric
+        logging.info(f"DONE: stage jogging")
+        return image_data, stage_positions
+        
+
+    
+    def jog_stage_or_piezoStage(self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), piezo: bool = False) -> str:
+        logging.info("Request to jog the stage/piezo")
+        if piezo :
+            logging.info("Piezo mode")
+            if not self.microscope.specimen.piezo_stage.is_enabled:
+                logging.info("peizo stage not enabled --- enabling")
+                self.microscope.specimen.piezo_stage.enable
+                logging.info(f"strting to move the piezo stage with velocity{stage_vel}")
+                self.microscope.specimen.piezo_stage.start_jogging(stage_vel)
+            else:
+                logging.info(f"strting to move the piezo stage with velocity{stage_vel}")
+                self.microscope.specimen.piezo_stage.start_jogging(stage_vel)
+
+        else:
+                logging.info(f"strting to move the stage with velocity{stage_vel}")
+                self.microscope.specimen.stage.start_jogging(stage_vel)
+
+
+        logging.info("DONE: stage/peizo_stage is moving dont forget to stop it if needed")
+        print("stage/peizo_stage is moving dont forget to stop it if needed")
+        return 
+    
+    def stop_jog_stage_or_piezoStage(self, piezo: bool = False) -> str:
+        logging.info("Request to stop the stage/piezo_stage")
+        if piezo :
+            logging.info("Piezo mode")
+            if not self.microscope.specimen.piezo_stage.is_moving:
+                self.microscope.specimen.piezo_stage.stop()
+            else:
+                logging.info(f"piezo is not moving in the first place")
+
+        else:
+                self.microscope.specimen.stage.stop_jogging()
+
+
+        logging.info("DONE: stage/peizo_stage is stopped moving")
+        print("stage/peizo_stage has stopped moving")
+        return 
 
 class DMacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
