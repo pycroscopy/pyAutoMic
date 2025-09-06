@@ -210,3 +210,5 @@ notebooks/WD
 
 scripts/
 notebooks/sample-exploration/sample-explore.py
+
+*.json
