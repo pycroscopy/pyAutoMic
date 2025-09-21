@@ -1,7 +1,3 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "stemOrchestrator"
 version = "0.1.0"
@@ -14,7 +10,11 @@ dependencies = [
     "autoscript-tem-microscope-client",
     "autoscript-tem-microscope-client-tests",
     "autoscript-tem-toolkit",
-    "bitsandbytes>=0.47.0",
+
+    # Linux-only GPU quantization libs (no macOS wheels):
+    "bitsandbytes>=0.47.0; platform_system != 'Darwin'",
+    "triton>=3.4.0; platform_system != 'Darwin'",
+
     "colorama>=0.4.6",
     "datasets>=4.1.1",
     "defusedxml>=0.7.1",
@@ -39,11 +39,16 @@ dependencies = [
     "torch>=2.8.0",
     "torchvision>=0.23.0",
     "transformers>=4.56.2",
-    "triton>=3.4.0",
     "trl==0.15.2",
     "twisted>=25.5.0",
 ]
 
+[project.optional-dependencies]
+# Install these only on Linux/CUDA machines when you want BnB/triton
+quant = [
+    "bitsandbytes>=0.47.0; platform_system != 'Darwin'",
+    "triton>=3.4.0; platform_system != 'Darwin'",
+]
 
 [tool.setuptools]
 package-dir = {"" = "."}

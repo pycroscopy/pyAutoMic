@@ -3648,14 +3648,14 @@ wheels = [
 [[package]]
 name = "stemorchestrator"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "agapi" },
     { name = "autoscript-core" },
     { name = "autoscript-tem-microscope-client" },
     { name = "autoscript-tem-microscope-client-tests" },
     { name = "autoscript-tem-toolkit" },
-    { name = "bitsandbytes" },
+    { name = "bitsandbytes", marker = "sys_platform != 'darwin'" },
     { name = "colorama" },
     { name = "datasets" },
     { name = "defusedxml" },
@@ -3680,9 +3680,15 @@ dependencies = [
     { name = "torch" },
     { name = "torchvision" },
     { name = "transformers" },
-    { name = "triton" },
+    { name = "triton", marker = "sys_platform != 'darwin'" },
     { name = "trl" },
     { name = "twisted" },
+]
+
+[package.optional-dependencies]
+quant = [
+    { name = "bitsandbytes", marker = "sys_platform != 'darwin'" },
+    { name = "triton", marker = "sys_platform != 'darwin'" },
 ]
 
 [package.metadata]
@@ -3692,7 +3698,8 @@ requires-dist = [
     { name = "autoscript-tem-microscope-client", path = "AS_1.14_wheels/autoscript_tem_microscope_client-1.14.0-py3-none-any.whl" },
     { name = "autoscript-tem-microscope-client-tests", path = "AS_1.14_wheels/autoscript_tem_microscope_client_tests-1.14.0-py3-none-any.whl" },
     { name = "autoscript-tem-toolkit", path = "AS_1.14_wheels/autoscript_tem_toolkit-1.14.0-py3-none-any.whl" },
-    { name = "bitsandbytes", specifier = ">=0.47.0" },
+    { name = "bitsandbytes", marker = "sys_platform != 'darwin'", specifier = ">=0.47.0" },
+    { name = "bitsandbytes", marker = "sys_platform != 'darwin' and extra == 'quant'", specifier = ">=0.47.0" },
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "defusedxml", specifier = ">=0.7.1" },
@@ -3717,10 +3724,12 @@ requires-dist = [
     { name = "torch", specifier = ">=2.8.0" },
     { name = "torchvision", specifier = ">=0.23.0" },
     { name = "transformers", specifier = ">=4.56.2" },
-    { name = "triton", specifier = ">=3.4.0" },
+    { name = "triton", marker = "sys_platform != 'darwin'", specifier = ">=3.4.0" },
+    { name = "triton", marker = "sys_platform != 'darwin' and extra == 'quant'", specifier = ">=3.4.0" },
     { name = "trl", specifier = "==0.15.2" },
     { name = "twisted", specifier = ">=25.5.0" },
 ]
+provides-extras = ["quant"]
 
 [[package]]
 name = "sympy"
