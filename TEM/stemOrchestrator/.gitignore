@@ -212,3 +212,6 @@ scripts/
 notebooks/sample-exploration/sample-explore.py
 
 *.json
+
+AS_1.14_wheels/
+notebooks/atomGPT_related/atomgpt/

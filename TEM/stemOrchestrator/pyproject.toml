@@ -7,3 +7,47 @@ name = "stemOrchestrator"
 version = "0.1.0"
 description = "A lightweight orchestrator for STEM acquisitions"
 authors = [{ email = "utkarshp1161@gmail.com" }]
+requires-python = ">3.11"
+dependencies = [
+    "agapi>=2025.9.15",
+    "autoscript-core",
+    "autoscript-tem-microscope-client",
+    "autoscript-tem-microscope-client-tests",
+    "autoscript-tem-toolkit",
+    "colorama>=0.4.6",
+    "datasets>=4.1.1",
+    "defusedxml>=0.7.1",
+    "h5py>=3.14.0",
+    "jarvis-tools>=2025.5.30",
+    "jupyter>=1.1.1",
+    "lxml>=6.0.1",
+    "matplotlib>=3.10.6",
+    "numpy>=2.3.3",
+    "openai>=1.108.1",
+    "opencv-python>=4.11.0.86",
+    "pandas>=2.3.2",
+    "peft>=0.17.1",
+    "pillow>=11.3.0",
+    "thermoscientific-logging",
+    "torch>=2.8.0",
+    "transformers>=4.56.2",
+    "trl>=0.23.0",
+]
+
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+include = ["stemorchestrator*"]
+exclude = ["notebooks*", "scripts*", "tests*", "docs*"]
+
+[tool.uv.sources]
+autoscript-core = { path = "AS_1.14_wheels/autoscript_core-5.32.0-py3-none-any.whl" }
+autoscript-tem-microscope-client-tests = { path = "AS_1.14_wheels/autoscript_tem_microscope_client_tests-1.14.0-py3-none-any.whl" }
+autoscript-tem-microscope-client = { path = "AS_1.14_wheels/autoscript_tem_microscope_client-1.14.0-py3-none-any.whl" }
+autoscript-tem-toolkit = { path = "AS_1.14_wheels/autoscript_tem_toolkit-1.14.0-py3-none-any.whl" }
+thermoscientific-logging = { path = "AS_1.14_wheels/thermoscientific_logging-5.32.0-py3-none-any.whl" }
+
+[tool.uv.workspace]
+members = []
