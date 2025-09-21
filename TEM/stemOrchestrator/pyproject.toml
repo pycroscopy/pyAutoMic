@@ -14,6 +14,7 @@ dependencies = [
     "autoscript-tem-microscope-client",
     "autoscript-tem-microscope-client-tests",
     "autoscript-tem-toolkit",
+    "bitsandbytes>=0.47.0",
     "colorama>=0.4.6",
     "datasets>=4.1.1",
     "defusedxml>=0.7.1",
@@ -31,7 +32,8 @@ dependencies = [
     "thermoscientific-logging",
     "torch>=2.8.0",
     "transformers>=4.56.2",
-    "trl>=0.23.0",
+    "triton>=3.4.0",
+    "trl==0.15.2",
 ]
 
 
