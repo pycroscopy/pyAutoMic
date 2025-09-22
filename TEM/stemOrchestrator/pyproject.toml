@@ -10,11 +10,9 @@ dependencies = [
     "autoscript-tem-microscope-client",
     "autoscript-tem-microscope-client-tests",
     "autoscript-tem-toolkit",
-
     # Linux-only GPU quantization libs (no macOS wheels):
     "bitsandbytes>=0.47.0; platform_system != 'Darwin'",
     "triton>=3.4.0; platform_system != 'Darwin'",
-
     "colorama>=0.4.6",
     "datasets>=4.1.1",
     "defusedxml>=0.7.1",
@@ -41,6 +39,8 @@ dependencies = [
     "transformers>=4.56.2",
     "trl==0.15.2",
     "twisted>=25.5.0",
+    "pytemlib>=0.2025.4.2",
+    "pip>=25.2",
 ]
 
 [project.optional-dependencies]

@@ -186,6 +186,7 @@ config_secret.json
 *.csv
 *.jpeg
 *.jpg
+*.emd
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 # Allow requirements
@@ -216,3 +217,4 @@ notebooks/sample-exploration/sample-explore.py
 AS_1.14_wheels/
 notebooks/atomGPT_related/atomgpt/
 notebooks/with_KB/
+notebooks/tutorials/EDS.ipynb
