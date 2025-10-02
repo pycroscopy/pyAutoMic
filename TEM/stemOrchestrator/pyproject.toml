@@ -41,6 +41,12 @@ dependencies = [
     "twisted>=25.5.0",
     "pytemlib>=0.2025.4.2",
     "pip>=25.2",
+    "pyqt6>=6.9.1",
+    "pyside6>=6.9.2",
+    "pyqt5>=5.15.11",
+    "pyside2>=5.15.2.1",
+    "sparse>=0.17.0",
+    "botorch==0.12.0",
 ]
 
 [project.optional-dependencies]
