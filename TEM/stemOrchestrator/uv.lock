@@ -841,6 +841,27 @@ wheels = [
 ]
 
 [[package]]
+name = "exspy"
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dask", extra = ["array"] },
+    { name = "hyperspy" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pint" },
+    { name = "pooch" },
+    { name = "prettytable" },
+    { name = "requests" },
+    { name = "scipy" },
+    { name = "traits" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ab/6d/f6c8531a2762c42b8c5c8a6fe111ae2a0984fafa6dd5d8cc10697f712a3c/exspy-0.3.2.tar.gz", hash = "sha256:c22ab6a3d5785f3194b4aead8f32d11f4161c55b042fe1d270caacfbf26f2397", size = 1424787, upload-time = "2025-03-02T18:26:51.825Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/26/18/afa22f8adf4fa6e6bb70dc683f1fcfcece9e88ffcf35d1c984309d5aaf65/exspy-0.3.2-py3-none-any.whl", hash = "sha256:3596ea40eb754055d6ef343a56f6c7f63ea2433951146f8a8df2e91595928660", size = 603814, upload-time = "2025-03-02T18:26:48.53Z" },
+]
+
+[[package]]
 name = "fastjsonschema"
 version = "2.21.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2957,6 +2978,20 @@ wheels = [
 ]
 
 [[package]]
+name = "pooch"
+version = "1.8.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "platformdirs" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c6/77/b3d3e00c696c16cf99af81ef7b1f5fe73bd2a307abca41bd7605429fe6e5/pooch-1.8.2.tar.gz", hash = "sha256:76561f0de68a01da4df6af38e9955c4c9d1a5c90da73f7e40276a5728ec83d10", size = 59353, upload-time = "2024-06-06T16:53:46.224Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/87/77cc11c7a9ea9fd05503def69e3d18605852cd0d4b0d3b8f15bbeb3ef1d1/pooch-1.8.2-py3-none-any.whl", hash = "sha256:3529a57096f7198778a5ceefd5ac3ef0e4d06a6ddaf9fc2d609b806f25302c47", size = 64574, upload-time = "2024-06-06T16:53:44.343Z" },
+]
+
+[[package]]
 name = "prettytable"
 version = "3.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4383,6 +4418,7 @@ dependencies = [
     { name = "colorama" },
     { name = "datasets" },
     { name = "defusedxml" },
+    { name = "exspy" },
     { name = "h5py" },
     { name = "hyperspy" },
     { name = "jarvis-tools" },
@@ -4435,6 +4471,7 @@ requires-dist = [
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "defusedxml", specifier = ">=0.7.1" },
+    { name = "exspy", specifier = ">=0.3.2" },
     { name = "h5py", specifier = ">=3.14.0" },
     { name = "hyperspy", specifier = ">=2.3.0" },
     { name = "jarvis-tools", specifier = ">=2025.5.30" },

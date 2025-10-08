@@ -47,6 +47,7 @@ dependencies = [
     "pyside2>=5.15.2.1",
     "sparse>=0.17.0",
     "botorch==0.12.0",
+    "exspy>=0.3.2",
 ]
 
 [project.optional-dependencies]
