@@ -1,7 +1,7 @@
 # Author credits - Utkarsh Pratiush <utkarshp1161@gmail.com>
 
 
-from typing import Tuple, List, Any
+from typing import Tuple, List
 import numpy as np
 
 def serialize_array(array: np.ndarray) -> Tuple[List, Tuple, str]:

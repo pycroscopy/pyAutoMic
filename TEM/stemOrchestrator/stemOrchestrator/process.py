@@ -13,15 +13,9 @@ from collections import defaultdict
 import tifffile
 from matplotlib_scalebar.scalebar import ScaleBar
 import numpy as np
-import logging
-import numpy as np
 import skimage.registration
 import matplotlib.pyplot as plt
-import numpy as np
-from typing import Tuple, Optional, Tuple, List
-import numpy as np
-import skimage.registration
-from scipy import ndimage
+from typing import Optional, Tuple
 
 
 def etree_to_dict(element):

@@ -6,8 +6,6 @@ import sys
 
 def setup_logging(out_path: str = ".") -> None:
     """Setup logging to both console and file (log_time.txt)."""
-    import logging
-    import sys
 
     # Clear previous handlers
     for handler in logging.root.handlers[:]:

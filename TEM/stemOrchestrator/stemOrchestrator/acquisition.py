@@ -1,19 +1,15 @@
 # Author credits - Utkarsh Pratiush <utkarshp1161@gmail.com>
 
 import logging
-import copy
 import json
-import logging
 import socket
 import time
-from typing import Tuple, Dict, List, Optional, Union, Sequence
+from typing import Tuple, List, Optional, Union, Sequence
 
 import numpy as np
 from datetime import datetime
 import Pyro5
 from twisted.internet import reactor, defer
-from twisted.protocols.basic import NetstringReceiver
-from twisted.internet.protocol import ReconnectingClientFactory
 import Pyro5.api
 
 from autoscript_tem_microscope_client import TemMicroscopeClient
@@ -152,13 +148,13 @@ class TFacquisition:
     def set_to_STEM_mode(self) -> None:
         logging.info("Request to set to Optical mode =  STEM mode")
         self.microscope.optics.optical_mode = OpticalMode.STEM
-        logging.info(f"DONE: set to Optical mode =  STEM mode")
+        logging.info("DONE: set to Optical mode =  STEM mode")
         return None     
     
     def set_to_TEM_mode(self) -> None:
         logging.info("Request to set to Optical mode =  TEM mode")
         self.microscope.optics.optical_mode = OpticalMode.TEM
-        logging.info(f"DONE: set to Optical mode =  TEM mode")
+        logging.info("DONE: set to Optical mode =  TEM mode")
         return None   
     
     def query_screen_postion(self) -> str:
@@ -170,13 +166,13 @@ class TFacquisition:
     def insert_screen(self) -> None:
         logging.info("Request to insert the screen")
         self.microscope.detectors.screen.insert()
-        logging.info(f"DONE: inserting the screen ")
+        logging.info("DONE: inserting the screen ")
         return 
 
     def retract_screen(self) -> None:
         logging.info("Request to retract the screen")
         self.microscope.detectors.screen.retract()
-        logging.info(f"DONE: retracting the screen ")
+        logging.info("DONE: retracting the screen ")
         pass
 
     def query_haadf_state(self) -> str:
@@ -406,14 +402,14 @@ class TFacquisition:
         logging.info("Request to invoke vision toolkit to plot an Adorned image")
         image_with_scale_bar = self.vt_add_scale_bar(image)
         vision_toolkit.plot_image(image_with_scale_bar)
-        logging.info(f"DONE: Plotting  ")
+        logging.info("DONE: Plotting  ")
         return 
 
     def vt_plot_images(self, images: Sequence[AdornedImage],  add_scale_bar: bool = True) -> None:
         logging.info("Request to invoke vision toolkit to plot an Adorned image's")
         images_with_scale_bar = [self.vt_add_scale_bar(i) for i in images ]
         vision_toolkit.plot_images(images_with_scale_bar)
-        logging.info(f"DONE: Plotting  ")
+        logging.info("DONE: Plotting  ")
         return 
     
     def vt_add_scale_bar(self, image: AdornedImage) -> None:
@@ -421,7 +417,7 @@ class TFacquisition:
         logging.info("make sure the scrip[t has access to arial.ttf font")
         print("make sure the scrip[t has access to arial.ttf font")
         image = vision_toolkit.add_scale_bar(image)
-        logging.info(f"DONE: added scalebar to the image")
+        logging.info("DONE: added scalebar to the image")
         return image
 
     def query_defocus(self)-> str:
@@ -451,62 +447,62 @@ class TFacquisition:
     
     def configure_eds_settings(self, eds_detector_name: str = EdsDetectorType.SUPER_X, dispersion: int=5, shaping_time: float = 3e-6, exposure_time: float = 2, exposure_time_type: str = ExposureTimeType.LIVE_TIME) -> EdsAcquisitionSettings:
         """Configure the EDS acquisition settings."""
-        logging.info(f"Request prepare settings for EDS acquisiton.")
+        logging.info("Request prepare settings for EDS acquisiton.")
         settings = EdsAcquisitionSettings()
         settings.eds_detector = eds_detector_name
         settings.dispersion = dispersion
         settings.shaping_time = shaping_time
         settings.exposure_time = exposure_time
         settings.exposure_time_type = exposure_time_type
-        logging.info(f"DONE: Request prepare settings for EDS acquisiton.")
+        logging.info("DONE: Request prepare settings for EDS acquisiton.")
         return settings
     
     def acquire_eds(self, settings: EdsAcquisitionSettings, handle_byte_order : bool = True) -> Union[np.ndarray, AdornedSpectrum]:
         """Perform EDS : TODO - make sure byte order issue is taken care from tf side"""
-        logging.info(f"Request for eds acquisiton")
+        logging.info("Request for eds acquisiton")
         if settings == None:
             settings = self.configure_eds_settings()
         eds_spectrum = self.microscope.analysis.acquire_eds_spectrum(settings)
         
         if handle_byte_order == True:
-            logging.info(f"Handling byte order issue----verify if not----needed")
+            logging.info("Handling byte order issue----verify if not----needed")
             dt = np.dtype('uint32').newbyteorder('<')
             eds_spectrum = np.frombuffer(eds_spectrum._raw_data, dtype=dt)
 
-        logging.info(f"DONE: Request for eds acquisiton")
+        logging.info("DONE: Request for eds acquisiton")
         return eds_spectrum
 
     def autofocus(self, exposure : float = 1e-5, haadf_resolution: int = 1024) -> None:
         """Perform autofocus with HAADF detector"""
-        logging.info(f"Performing autofocus with HAADF detector")
+        logging.info("Performing autofocus with HAADF detector")
         settings = RunStemAutoFocusSettings(DetectorType.HAADF, haadf_resolution, exposure, True, reset_beam_blanker_afterwards=True)
         self.microscope.auto_functions.run_stem_auto_focus(settings)
-        logging.info(f"DONE autofocus with HAADF detector")
+        logging.info("DONE autofocus with HAADF detector")
         return None
 
         
     def optistem_c1(self, dwell_time : float = 2e-06, cutoff_in_pixels: int = 5) -> None:
         """Perform optistem - defocus - c1"""
-        logging.info(f"Performing c1 optistem correction.")
+        logging.info("Performing c1 optistem correction.")
         settings = RunOptiStemSettings(method=OptiStemMethod.C1, dwell_time=dwell_time, cutoff_in_pixels=cutoff_in_pixels)
         self.microscope.auto_functions.run_opti_stem(settings)
-        logging.info(f"DONE c1 optistem correction.")
+        logging.info("DONE c1 optistem correction.")
         return None
 
     def optistem_c1_a1(self, dwell_time : float = 2e-06, cutoff_in_pixels: int = 5) -> None:
         """Perform optistem - defocus - c1_a1"""
-        logging.info(f"Performing c1_a1 optistem correction.")
+        logging.info("Performing c1_a1 optistem correction.")
         settings = RunOptiStemSettings(method=OptiStemMethod.C1_A1, dwell_time=dwell_time, cutoff_in_pixels=cutoff_in_pixels)
         self.microscope.auto_functions.run_opti_stem(settings)
-        logging.info(f"DONE c1 a1 optistem correction.")
+        logging.info("DONE c1 a1 optistem correction.")
         return None
     
     def optistem_b2_a2(self, dwell_time: float = 2e-06) -> None:
         """Perform optistem - 2nd order"""
-        logging.info(f"Performing B2_A2 optistem correction.")
+        logging.info("Performing B2_A2 optistem correction.")
         settings = RunOptiStemSettings(method=OptiStemMethod.B2_A2, dwell_time=dwell_time)
         self.microscope.auto_functions.run_opti_stem(settings)
-        logging.info(f"DONE B2_A2 optistem correction.")
+        logging.info("DONE B2_A2 optistem correction.")
         return None
 
     def query_paused_beam_positon(self) -> Point:
@@ -548,7 +544,7 @@ class TFacquisition:
     
     def query_stage_position(self) -> StagePosition:
         #Returns the stage position (X, Y, Z) in meters, A and B in radians.
-        logging.info(f"Querying the stage position now: the stage position (X, Y, Z) in meters, A and B in radians")
+        logging.info("Querying the stage position now: the stage position (X, Y, Z) in meters, A and B in radians")
         pos = self.microscope.specimen.stage.position
         pos_dict_m = {"x" : pos[0], "y" : pos[1], "z" : pos[2]}
         pos_dict_nm = {"x" : pos[0]*10**(-9), "y" : pos[1]*10**(-9), "z" : pos[2]*10**(-9)}
@@ -631,7 +627,7 @@ class TFacquisition:
             logging.info("Performing beam blanking (old method)")
             self.microscope.optics.blank()
             logging.info("DONE -- beam blanking")
-        except (AttributeError, Warning, ValueError) as e:
+        except (AttributeError, Warning, ValueError):
             logging.info("Performing beam blanking (fallback to blanker)")
             self.microscope.optics.blanker.blank()
             logging.info("DONE -- beam blanking (fallback method)")
@@ -710,7 +706,7 @@ class TFacquisition:
                         }
         logging.info(f"Setting Magnification to {magnification}--- in FOV: {FIELD_OF_VIEW[magnification]}")
         self.microscope.optics.scan_field_of_view = FIELD_OF_VIEW[magnification]
-        logging.info(f"FOV is now set")
+        logging.info("FOV is now set")
         return
 
     def jog_and_capture_with_metrics(self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), steps: int = 1, seconds_per_step: int = 2, resolution: int = 512,  exposure: float = 200e-9, min_steps: int = 4, max_decline_counter: int = 1) -> str:
@@ -770,7 +766,7 @@ class TFacquisition:
                     break
 
             previous_metric = metric
-        logging.info(f"DONE: stage jogging")
+        logging.info("DONE: stage jogging")
         return image_data, stage_positions
         
 
@@ -804,7 +800,7 @@ class TFacquisition:
             if not self.microscope.specimen.piezo_stage.is_moving:
                 self.microscope.specimen.piezo_stage.stop()
             else:
-                logging.info(f"piezo is not moving in the first place")
+                logging.info("piezo is not moving in the first place")
 
         else:
                 self.microscope.specimen.stage.stop_jogging()
@@ -841,25 +837,25 @@ class DMacquisition:
         """Perform EELS acquisition to just check"""
         # TODO: eels_disp_mult --> need to handle
         if not self.offline:
-            logging.info(f"Performing EELS")
+            logging.info("Performing EELS")
             self.microscope.acquire_camera(exposure = eels_exposure_seconds)
             # microscope.optics.blank()
             array_list, shape, dtype = self.microscope.get_eels()
             array = np.array(array_list, dtype=dtype).reshape(shape)
-            logging.info(f"DONE EELS")
+            logging.info("DONE EELS")
             
         else:# offline
-            logging.info(f"Performing EELS")
+            logging.info("Performing EELS")
             # microscope.optics.blank()
             array_list, shape, dtype = self.microscope.get_eels()
             array = np.array(array_list, dtype=dtype).reshape(shape)
-            logging.info(f"DONE EELS ")
+            logging.info("DONE EELS ")
             
         return array
 
     def acquire_eels_threading(self, eels_exposure_seconds : int = 2, eels_dispersion : float = 0.3, eels_dispersion_mult : float = 0, eels_cycles = 1) -> np.ndarray:
         """Perform EELS acquisition to across points and get single spectrum"""
-        logging.info(f"DONE EELS at dummy points just for checking.")
+        logging.info("DONE EELS at dummy points just for checking.")
         return 
 
 

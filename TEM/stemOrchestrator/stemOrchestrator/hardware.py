@@ -3,7 +3,7 @@
 ## based on the CEOS - json rpc client dummy codes
 import json
 import logging
-from twisted.internet import reactor, defer
+from twisted.internet import defer
 from twisted.protocols.basic import NetstringReceiver
 from twisted.internet.protocol import ReconnectingClientFactory
 
