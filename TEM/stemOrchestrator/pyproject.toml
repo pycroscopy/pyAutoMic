@@ -51,6 +51,8 @@ dependencies = [
     "ruff>=0.14.0",
     "gpax>=0.1.9",
     "atomai>=0.8.1",
+    "google-genai>=1.44.0",
+    "scilink",
 ]
 
 [project.optional-dependencies]
@@ -73,6 +75,7 @@ autoscript-tem-microscope-client-tests = { path = "AS_1.14_wheels/autoscript_tem
 autoscript-tem-microscope-client = { path = "AS_1.14_wheels/autoscript_tem_microscope_client-1.14.0-py3-none-any.whl" }
 autoscript-tem-toolkit = { path = "AS_1.14_wheels/autoscript_tem_toolkit-1.14.0-py3-none-any.whl" }
 thermoscientific-logging = { path = "AS_1.14_wheels/thermoscientific_logging-5.32.0-py3-none-any.whl" }
+scilink = { git = "https://github.com/ziatdinovmax/SciLink" }
 
 [tool.uv.workspace]
 members = []
