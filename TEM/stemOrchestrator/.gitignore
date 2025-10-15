@@ -187,6 +187,7 @@ config_secret.json
 *.jpeg
 *.jpg
 *.emd
+*.tif
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 # Allow requirements
@@ -221,3 +222,7 @@ notebooks/with_AH/
 notebooks/tutorials/EDS.ipynb
 
 notebooks/BO_related/active-learning-in-microscopy/
+notebooks/atomGPT_related/AS-1.14.zip
+notebooks/atomGPT_related/AS-1.14*
+
+__MACOSX/
