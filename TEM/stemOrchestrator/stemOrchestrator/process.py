@@ -82,7 +82,7 @@ def tiff_to_numpy(tiff_path: str) -> np.ndarray:
         return tif.asarray()
 
 
-def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False) -> None:
+def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False, save_png = False) -> None:
     """
     Autoscript HAADF tiff support
     Reads a HAADF TIFF file, extracts pixel size metadata, and plots the image with a scalebar.
@@ -157,14 +157,16 @@ def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False) -> None:
 
     # Hide axes
     ax.axis('off')
-
+    if save_png :
+        png_path = HAADF_path.replace('.tiff', '.png')
+        plt.savefig(png_path)
     # Show the plot
     plt.show()
     
     if return_pixel_size == True:
         return pixel_size_x, float(pixel_size_y)
 
-def tiff_to_png(HAADF_path: str) -> None:
+def tiff_to_png(ceta_path: str, save_png = False) -> None:
     """
     Autoscript ceta tiff support
     Reads a ceta TIFF file, extracts pixel size metadata, and plots the image with a scalebar.
@@ -177,13 +179,17 @@ def tiff_to_png(HAADF_path: str) -> None:
     """
 
     # Read the TIFF image data
-    with tifffile.TiffFile(HAADF_path) as tif:
+    with tifffile.TiffFile(ceta_path) as tif:
         image = tif.asarray()
 
     # Plot the image
     fig, ax = plt.subplots()
     ax.imshow(image, cmap='gray')
     ax.axis('off')
+    if save_png :
+        png_path = ceta_path.replace('.tiff', '.png')
+        plt.savefig(png_path)
+        
     plt.show()
     
     
