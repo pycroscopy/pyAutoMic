@@ -225,4 +225,7 @@ notebooks/BO_related/active-learning-in-microscopy/
 notebooks/atomGPT_related/AS-1.14.zip
 notebooks/atomGPT_related/AS-1.14*
 
+out/
+
+
 __MACOSX/
