@@ -4,6 +4,7 @@
 import logging
 import sys
 
+
 def setup_logging(out_path: str = ".") -> None:
     """Setup logging to both console and file (log_time.txt)."""
 
@@ -16,7 +17,6 @@ def setup_logging(out_path: str = ".") -> None:
         level=logging.INFO,
         handlers=[
             logging.FileHandler(f"{out_path}/log_time.txt"),
-            logging.StreamHandler(sys.stdout)
-        ]
+            logging.StreamHandler(sys.stdout),
+        ],
     )
-

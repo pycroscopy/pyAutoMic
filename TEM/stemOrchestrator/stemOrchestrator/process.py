@@ -8,6 +8,7 @@ Has:
     - drift plotting
 
 """
+
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 import tifffile
@@ -29,15 +30,16 @@ def etree_to_dict(element):
                 dd[k].append(v)
         d = {element.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
     if element.attrib:
-        d[element.tag].update(('@' + k, v) for k, v in element.attrib.items())
+        d[element.tag].update(("@" + k, v) for k, v in element.attrib.items())
     if element.text:
         text = element.text.strip()
         if children or element.attrib:
             if text:
-                d[element.tag]['#text'] = text
+                d[element.tag]["#text"] = text
         else:
             d[element.tag] = text
     return d
+
 
 def tiff_metadata(tiff_path: str) -> dict:
     """
@@ -58,10 +60,10 @@ def tiff_metadata(tiff_path: str) -> dict:
             metadata[name] = value
 
         # Check for special XML tags like FEI_TITAN
-        if 'FEI_TITAN' in metadata:
+        if "FEI_TITAN" in metadata:
             try:
-                root = ET.fromstring(metadata['FEI_TITAN'])
-                metadata['FEI_TITAN_parsed'] = etree_to_dict(root)
+                root = ET.fromstring(metadata["FEI_TITAN"])
+                metadata["FEI_TITAN_parsed"] = etree_to_dict(root)
             except ET.ParseError:
                 print("Warning: Failed to parse FEI_TITAN metadata.")
 
@@ -82,7 +84,9 @@ def tiff_to_numpy(tiff_path: str) -> np.ndarray:
         return tif.asarray()
 
 
-def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False, save_png = False) -> None:
+def HAADF_tiff_to_png(
+    HAADF_path: str, return_pixel_size: bool = False, save_png=False
+) -> None:
     """
     Autoscript HAADF tiff support
     Reads a HAADF TIFF file, extracts pixel size metadata, and plots the image with a scalebar.
@@ -93,7 +97,7 @@ def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False, save_png
     Returns:
         None
     """
-    
+
     def etree_to_dict(element):
         """Converts an XML ElementTree into a nested dictionary."""
         d = {element.tag: {} if element.attrib else None}
@@ -105,12 +109,12 @@ def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False, save_png
                     dd[k].append(v)
             d = {element.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
         if element.attrib:
-            d[element.tag].update(('@' + k, v) for k, v in element.attrib.items())
+            d[element.tag].update(("@" + k, v) for k, v in element.attrib.items())
         if element.text:
             text = element.text.strip()
             if children or element.attrib:
                 if text:
-                    d[element.tag]['#text'] = text
+                    d[element.tag]["#text"] = text
             else:
                 d[element.tag] = text
         return d
@@ -118,23 +122,23 @@ def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False, save_png
     # Open the TIFF file and extract metadata
     with tifffile.TiffFile(HAADF_path) as tif:
         # Check if FEI_TITAN metadata exists
-        fei_titan_metadata_xml = tif.pages[0].tags.get('FEI_TITAN')
+        fei_titan_metadata_xml = tif.pages[0].tags.get("FEI_TITAN")
         if fei_titan_metadata_xml is None:
             print("Warning: FEI_TITAN metadata not found in the TIFF file.")
             return
-        
+
         # Parse metadata
         root = ET.fromstring(fei_titan_metadata_xml.value)
         metadata_dict = etree_to_dict(root)
 
     # Extract the PixelSize information
-    binary_result = metadata_dict.get('Metadata', {}).get('BinaryResult', {})
-    
-    pixel_size_x = binary_result.get('PixelSize', {}).get('X', {}).get('#text')
-    pixel_size_y = binary_result.get('PixelSize', {}).get('Y', {}).get('#text')
+    binary_result = metadata_dict.get("Metadata", {}).get("BinaryResult", {})
 
-    unit_x = binary_result.get('PixelSize', {}).get('X', {}).get('@unit')
-    
+    pixel_size_x = binary_result.get("PixelSize", {}).get("X", {}).get("#text")
+    pixel_size_y = binary_result.get("PixelSize", {}).get("Y", {}).get("#text")
+
+    unit_x = binary_result.get("PixelSize", {}).get("X", {}).get("@unit")
+
     # Convert pixel size to float
     try:
         pixel_size_x = float(pixel_size_x)
@@ -148,25 +152,32 @@ def HAADF_tiff_to_png(HAADF_path: str, return_pixel_size: bool = False, save_png
 
     # Plot the image
     fig, ax = plt.subplots()
-    ax.imshow(image, cmap='gray')
+    ax.imshow(image, cmap="gray")
 
     # Add a scale bar
-    scalebar = ScaleBar(pixel_size_x, location='lower right', length_fraction=0.25,
-                        label=f'1 pixel = {pixel_size_x:.2e} {unit_x}', color='white', box_alpha=0.5)
+    scalebar = ScaleBar(
+        pixel_size_x,
+        location="lower right",
+        length_fraction=0.25,
+        label=f"1 pixel = {pixel_size_x:.2e} {unit_x}",
+        color="white",
+        box_alpha=0.5,
+    )
     ax.add_artist(scalebar)
 
     # Hide axes
-    ax.axis('off')
-    if save_png :
-        png_path = HAADF_path.replace('.tiff', '.png')
+    ax.axis("off")
+    if save_png:
+        png_path = HAADF_path.replace(".tiff", ".png")
         plt.savefig(png_path)
     # Show the plot
     plt.show()
-    
+
     if return_pixel_size == True:
         return pixel_size_x, float(pixel_size_y)
 
-def tiff_to_png(ceta_path: str, save_png = False) -> None:
+
+def tiff_to_png(ceta_path: str, save_png=False) -> None:
     """
     Autoscript ceta tiff support
     Reads a ceta TIFF file, extracts pixel size metadata, and plots the image with a scalebar.
@@ -184,18 +195,18 @@ def tiff_to_png(ceta_path: str, save_png = False) -> None:
 
     # Plot the image
     fig, ax = plt.subplots()
-    ax.imshow(image, cmap='gray')
-    ax.axis('off')
-    if save_png :
-        png_path = ceta_path.replace('.tiff', '.png')
+    ax.imshow(image, cmap="gray")
+    ax.axis("off")
+    if save_png:
+        png_path = ceta_path.replace(".tiff", ".png")
         plt.savefig(png_path)
-        
+
     plt.show()
-    
-    
+
+
 # def compute_drift_GD(fixed_image: np.ndarray, shifted_image: np.ndarray) -> Tuple[float, float, Optional[float], Optional[float]]:
 #     """
-#     Simple FFT based drift correction 
+#     Simple FFT based drift correction
 #     # credits : https://github.com/pycroscopy/pyTEMlib/blob/main/pyTEMlib/image_tools.py -> def rigid_registration(dataset, sub_pixel=True):
 #     """
 #     fft_fixed = np.fft.fft2(fixed_image)
@@ -210,16 +221,21 @@ def tiff_to_png(ceta_path: str, save_png = False) -> None:
 
 #     return shift[0], shift[1], image_product
 
-def compute_drift_GD(fixed_image: np.ndarray, shifted_image: np.ndarray, normalization: str = "low_mag") -> Tuple[float, float, Optional[float], Optional[float]]:
+
+def compute_drift_GD(
+    fixed_image: np.ndarray, shifted_image: np.ndarray, normalization: str = "low_mag"
+) -> Tuple[float, float, Optional[float], Optional[float]]:
     """
-    Simple FFT based drift correction 
+    Simple FFT based drift correction
     # credits : https://github.com/pycroscopy/pyTEMlib/blob/main/pyTEMlib/image_tools.py -> def rigid_registration(dataset, sub_pixel=True):
     """
     if normalization == "low_mag":
-        normalization = "phase"   
+        normalization = "phase"
     else:
         normalization = None
-    drift, error, _ =  skimage.registration.phase_cross_correlation(fixed_image, shifted_image, normalization=normalization)# normalization can be None or "phase"- it gives all the drift in y direction which I dont get right now
+    drift, error, _ = skimage.registration.phase_cross_correlation(
+        fixed_image, shifted_image, normalization=normalization
+    )  # normalization can be None or "phase"- it gives all the drift in y direction which I dont get right now
     return drift[0], drift[1]
 
 
@@ -228,7 +244,7 @@ def compute_drift(
     image2: np.ndarray,
     sub_pixel: bool = True,
     return_magnitude: bool = False,
-    return_angle: bool = False
+    return_angle: bool = False,
 ) -> Tuple[float, float, Optional[float], Optional[float]]:
     """
     Compute drift between two images using phase cross-correlation.
@@ -264,7 +280,8 @@ def compute_drift(
         angle = np.degrees(np.arctan2(y_drift, x_drift)) if return_angle else None
         return x_drift, y_drift, magnitude, angle
 
-    return x_drift, y_drift 
+    return x_drift, y_drift
+
 
 def plot_drift_comparison(image1, image2, shift_x, shift_y):
     """
@@ -287,7 +304,9 @@ def plot_drift_comparison(image1, image2, shift_x, shift_y):
     # Overlay shifted image on original
     combined = np.zeros((image1.shape[0], image1.shape[1], 3))
     combined[..., 0] = image1 / np.max(image1)  # Red Channel
-    combined[..., 1] = np.roll(image2 / np.max(image2), (int(shift_y), int(shift_x)), axis=(0, 1))  # Green Channel
+    combined[..., 1] = np.roll(
+        image2 / np.max(image2), (int(shift_y), int(shift_x)), axis=(0, 1)
+    )  # Green Channel
 
     # Center of image
     center_y, center_x = image1.shape[0] // 2, image1.shape[1] // 2
@@ -297,22 +316,28 @@ def plot_drift_comparison(image1, image2, shift_x, shift_y):
     axs[0].imshow(image1, cmap="gray")
     axs[0].set_title("Reference Image")
     axs[0].plot(center_x, center_y, "ro", markersize=10, label="Reference")
-    axs[0].arrow(center_x, center_y, shift_x, shift_y, color="yellow", width=1, head_width=5)
+    axs[0].arrow(
+        center_x, center_y, shift_x, shift_y, color="yellow", width=1, head_width=5
+    )
 
     # Second plot: Shifted Image
     axs[1].imshow(image2, cmap="gray")
     axs[1].set_title("Shifted Image")
     axs[1].plot(end_x, end_y, "bo", markersize=10, label="Shifted")
-    axs[1].arrow(end_x, end_y, -shift_x, -shift_y, color="yellow", width=1, head_width=5)
+    axs[1].arrow(
+        end_x, end_y, -shift_x, -shift_y, color="yellow", width=1, head_width=5
+    )
 
     # Third plot: Overlay (Red = Reference, Green = Shifted)
     axs[2].imshow(combined)
     axs[2].set_title("Overlay of Both Images (Drift Visualization)")
 
-
-    imPlus = image1[ int(shift_x):, : int(shift_y)] + image2[:-int(shift_x), -int(shift_y):]
-    # This line serves as a verification step for drift correction by summing the overlapping regions 
-    # of two images after applying the estimated shift (shift_x, shift_y). If the drift estimate 
+    imPlus = (
+        image1[int(shift_x) :, : int(shift_y)]
+        + image2[: -int(shift_x), -int(shift_y) :]
+    )
+    # This line serves as a verification step for drift correction by summing the overlapping regions
+    # of two images after applying the estimated shift (shift_x, shift_y). If the drift estimate
     # is accurate, the resulting sum (imPlus) should show well-aligned features, confirming successful correction.
     axs[3].imshow(imPlus)
     axs[3].set_title("slicing and adding")
@@ -329,14 +354,15 @@ def plot_drift_comparison(image1, image2, shift_x, shift_y):
     return fig
 
 
-
-def plot_eels(eels: np.ndarray, 
-              energy_range: tuple = (0, 1000),
-              title: Optional[str] = None,
-              save_path: Optional[str] = None) -> None:
+def plot_eels(
+    eels: np.ndarray,
+    energy_range: tuple = (0, 1000),
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> None:
     """
     Plot EELS spectrum with proper formatting.
-    
+
     Args:
         eels (np.ndarray): EELS spectrum data
         energy_range (tuple): Energy loss range in eV
@@ -345,29 +371,29 @@ def plot_eels(eels: np.ndarray,
     """
     # Create energy loss axis
     energy_loss = np.linspace(energy_range[0], energy_range[1], len(eels))
-    
+
     # Create figure with appropriate size
     plt.figure(figsize=(10, 6))
-    
+
     # Plot spectrum
-    plt.plot(energy_loss, eels, 'b-', linewidth=1)
-    
+    plt.plot(energy_loss, eels, "b-", linewidth=1)
+
     # Add labels and title
-    plt.xlabel('Energy Loss (eV)')
-    plt.ylabel('Intensity (a.u.)')
+    plt.xlabel("Energy Loss (eV)")
+    plt.ylabel("Intensity (a.u.)")
     if title:
         plt.title(title)
-    
+
     # Add grid
     plt.grid(True, alpha=0.3)
-    
+
     # Set y-axis to log scale for better visibility of features
     # plt.yscale('log')
-    
+
     # Adjust layout
     plt.tight_layout()
-    
+
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
     plt.show()

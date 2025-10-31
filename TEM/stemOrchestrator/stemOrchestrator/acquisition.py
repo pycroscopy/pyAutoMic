@@ -13,8 +13,25 @@ from twisted.internet import reactor, defer
 import Pyro5.api
 
 from autoscript_tem_microscope_client import TemMicroscopeClient
-from autoscript_tem_microscope_client.enumerations import DetectorType, CameraType, OptiStemMethod, OpticalMode, EdsDetectorType, ExposureTimeType
-from autoscript_tem_microscope_client.structures import RunOptiStemSettings, RunStemAutoFocusSettings, Point, StagePosition, AdornedImage, EdsAcquisitionSettings, AdornedSpectrum,  StemAcquisitionSettings, StageVelocity
+from autoscript_tem_microscope_client.enumerations import (
+    DetectorType,
+    CameraType,
+    OptiStemMethod,
+    OpticalMode,
+    EdsDetectorType,
+    ExposureTimeType,
+)
+from autoscript_tem_microscope_client.structures import (
+    RunOptiStemSettings,
+    RunStemAutoFocusSettings,
+    Point,
+    StagePosition,
+    AdornedImage,
+    EdsAcquisitionSettings,
+    AdornedSpectrum,
+    StemAcquisitionSettings,
+    StageVelocity,
+)
 import autoscript_tem_toolkit.vision as vision_toolkit
 
 from stemOrchestrator.simulation import DMtwin
@@ -31,13 +48,18 @@ class TFacquisition:
         logging.info("Starting microscope initialization...")
         self.microscope = microscope
 
-        
         try:
-            self.ceta_cam = self.microscope.detectors.get_camera_detector(CameraType.BM_CETA)
+            self.ceta_cam = self.microscope.detectors.get_camera_detector(
+                CameraType.BM_CETA
+            )
             logging.info("CETA camera initialized")
-            self.haadf_det = self.microscope.detectors.get_scanning_detector(DetectorType.HAADF)
+            self.haadf_det = self.microscope.detectors.get_scanning_detector(
+                DetectorType.HAADF
+            )
             logging.info("HAADF detector initialized")
-            self.flu_cam = self.microscope.detectors.get_camera_detector(CameraType.FLUCAM)
+            self.flu_cam = self.microscope.detectors.get_camera_detector(
+                CameraType.FLUCAM
+            )
         except Exception as e:
             logging.error(f"Failed to initialize detectors: {str(e)}")
             raise
@@ -48,27 +70,25 @@ class TFacquisition:
         # self.current_stage_position = self.query_stage_position()
         # self.last_stage_postion = copy.deepcopy(self.current_stage_position)
         # self.initial_stage_postion = copy.deepcopy(self.current_stage_position)
-        
+
         # self.last_paused_beam_positon = self.query_paused_beam_positon()
-        # self.current_paused_beam_positon = copy.deepcopy(self.last_paused_beam_positon) 
-        # self.initial_paused_beam_position = copy.deepcopy(self.last_paused_beam_positon) 
+        # self.current_paused_beam_positon = copy.deepcopy(self.last_paused_beam_positon)
+        # self.initial_paused_beam_position = copy.deepcopy(self.last_paused_beam_positon)
 
         # self.last_beam_shift_pos = self.query_beam_shift_position()
         # self.initial_beam_shift_pos = copy.deepcopy(self.last_beam_shift_pos)
         # self.current_beam_shift_pos = copy.deepcopy(self.last_beam_shift_pos)
-        
 
         # self.state = self.microscope.state.__dir__()
         # logging.info(f"THE AS provided state: microscope.state - {self.state}")
-        
+
         logging.info("Microscope initialization completed successfully")
-  
 
     def query_state_of_microscope(self) -> None:
         """
-        vacuum, optical mode, is beam_blanked, 
+        vacuum, optical mode, is beam_blanked,
         beam shift position, paused beam postion, stage position,
-        FOV, screen current, 
+        FOV, screen current,
         """
         logging.info("Request to log the state of the microscope")
         self.query_server_address()
@@ -93,7 +113,6 @@ class TFacquisition:
         val = self.microscope.server_host
         logging.info(f"Done: address of the microscope is :{val}")
         return val
-        
 
     def query_server_version(self):
         logging.info("Request: query the version of server")
@@ -106,68 +125,71 @@ class TFacquisition:
         val = self.microscope.service.autoscript.client.version
         logging.info(f"Done: version of the client is :{val}")
         return val
-        
+
     def query_vacuum_state(self):
         logging.info("Request: query the vacuum of the microscope")
         val = self.microscope.vacuum.state
         logging.info(f"Done: vacuum of the microscope is :{val}")
         return val
-        
-        
+
     def query_relevant_metadata_of_image(self, image: AdornedImage) -> None:
         logging.info("Request to query the metadata of an AdornedImage object")
 
         try:
             logging.info(f"Defocus: {image.metadata.optics.defocus}")
-            logging.info(f"C2 Lens Intensity: {image.metadata.optics.c2_lens_intensity}")
+            logging.info(
+                f"C2 Lens Intensity: {image.metadata.optics.c2_lens_intensity}"
+            )
             logging.info(f"Beam Tilt: {image.metadata.optics.beam_tilt}")
-            logging.info(f"Stage Position: {image.metadata.stage_settings.stage_position}")
+            logging.info(
+                f"Stage Position: {image.metadata.stage_settings.stage_position}"
+            )
         except AttributeError as e:
             logging.error(f"Error accessing metadata attributes: {e}")
 
         logging.info("DONE: Request to query the metadata of an AdornedImage object")
-    
+
     def template_func(self) -> str:
         logging.info("Request to query the ....")
         val = "bla"
         logging.info(f"DONE: {val} ")
         return val
-        
+
     def query_list_of_detectors(self) -> List:
         logging.info("Request to query the list of detectors on the Scope")
         val = self.microscope.detectors.camera_detectors
         logging.info(f"DONE: querying the list of detectors: {val} ")
         return val
-    
+
     def query_optical_mode(self) -> str:
         logging.info("Request to query the optical mode of the instrument")
         optical_mode = self.microscope.optics.optical_mode
         logging.info(f"DONE: the optical mde of the microsocpe is {optical_mode}")
         return optical_mode
-    
+
     def set_to_STEM_mode(self) -> None:
         logging.info("Request to set to Optical mode =  STEM mode")
         self.microscope.optics.optical_mode = OpticalMode.STEM
         logging.info("DONE: set to Optical mode =  STEM mode")
-        return None     
-    
+        return None
+
     def set_to_TEM_mode(self) -> None:
         logging.info("Request to set to Optical mode =  TEM mode")
         self.microscope.optics.optical_mode = OpticalMode.TEM
         logging.info("DONE: set to Optical mode =  TEM mode")
-        return None   
-    
+        return None
+
     def query_screen_postion(self) -> str:
         logging.info("Request to query the position of the screen")
         val = self.microscope.detectors.screen.position
         logging.info(f"DONE: The state of the screen is {val} ")
         return val
-    
+
     def insert_screen(self) -> None:
         logging.info("Request to insert the screen")
         self.microscope.detectors.screen.insert()
         logging.info("DONE: inserting the screen ")
-        return 
+        return
 
     def retract_screen(self) -> None:
         logging.info("Request to retract the screen")
@@ -180,49 +202,70 @@ class TFacquisition:
         val = self.haadf_det.insertion_state
         logging.info(f"DONE: The state of the HAADF is {val} ")
         return val
-    
+
     def query_ceta_state(self) -> str:
         logging.info("Request to query the position of the CETA")
         val = self.ceta_cam.insertion_state
         logging.info(f"DONE: The state of the CETA is {val} ")
         return val
 
-    def acquire_haadf(self, exposure: float = 40e-9, resolution: int = 512, return_pixel_size: bool = False, dont_save_but_return_object: bool = False, return_adorned_object: bool = False, folder_path = "./") -> Tuple[np.ndarray, str, Optional[Tuple]]:
+    def acquire_haadf(
+        self,
+        exposure: float = 40e-9,
+        resolution: int = 512,
+        return_pixel_size: bool = False,
+        dont_save_but_return_object: bool = False,
+        return_adorned_object: bool = False,
+        folder_path="./",
+    ) -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire HAADF image."""
         logging.info("Acquiring HAADF image.")
         if exposure > 10e-6:
-            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
-            if confirm.lower() == 'yes':
+            confirm = input(
+                f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): "
+            )
+            if confirm.lower() == "yes":
                 print("Proceeding...")
             else:
                 print("Operation canceled.")
                 return
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.unblank_beam()
-        image = self.microscope.acquisition.acquire_stem_image(DetectorType.HAADF, resolution, exposure)# takes 40 seconds
+        image = self.microscope.acquisition.acquire_stem_image(
+            DetectorType.HAADF, resolution, exposure
+        )  # takes 40 seconds
         self.blank_beam()
         img = image.data - np.min(image.data)
-        image_data = (255*(img/np.max(img))).astype(np.uint8)
-        if dont_save_but_return_object: # :IDEA - to work with sidpy datasets directly
+        image_data = (255 * (img / np.max(img))).astype(np.uint8)
+        if dont_save_but_return_object:  # :IDEA - to work with sidpy datasets directly
             return image, image_data
-        image.save(f"{folder_path}HAADF_image_{current_time}")# saves the tiff
+        image.save(f"{folder_path}HAADF_image_{current_time}")  # saves the tiff
         haadf_tiff_name = f"HAADF_image_{current_time}.tiff"
-        logging.info("saving HAADF image as TF which has all the metadata..also returning an array")
+        logging.info(
+            "saving HAADF image as TF which has all the metadata..also returning an array"
+        )
         # convert the image to noarray and return that as well
 
         # HAADF_tiff_to_png(f"HAADF_image_{current_time}.tff")
-        logging.info("Done: Acquiring HAADF image - beam is blanked after acquisition - HAADF det is inserted")
+        logging.info(
+            "Done: Acquiring HAADF image - beam is blanked after acquisition - HAADF det is inserted"
+        )
 
         if return_pixel_size and return_adorned_object:
-            pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
+            pixel_size_tuple = (
+                image.metadata.binary_result.pixel_size.x,
+                image.metadata.binary_result.pixel_size.y,
+            )
             return image, image_data, haadf_tiff_name, pixel_size_tuple
 
         if return_pixel_size:
-            pixel_size_tuple = image.metadata.binary_result.pixel_size.x, image.metadata.binary_result.pixel_size.y
+            pixel_size_tuple = (
+                image.metadata.binary_result.pixel_size.x,
+                image.metadata.binary_result.pixel_size.y,
+            )
             return image_data, haadf_tiff_name, pixel_size_tuple
-        
-        return image_data, haadf_tiff_name
 
+        return image_data, haadf_tiff_name
 
     def acquire_bf(
         self,
@@ -231,15 +274,17 @@ class TFacquisition:
         return_pixel_size: bool = False,
         dont_save_but_return_object: bool = False,
         return_adorned_object: bool = False,
-        folder_path: str = "./"
+        folder_path: str = "./",
     ) -> Optional[Tuple[np.ndarray, str, Optional[Tuple[float, float]]]]:
         """Acquire Bright Field (BF) STEM image."""
 
         logging.info("Acquiring BF image.")
 
         if exposure > 10e-6:
-            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
-            if confirm.lower() != 'yes':
+            confirm = input(
+                f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): "
+            )
+            if confirm.lower() != "yes":
                 print("Operation canceled.")
                 return None
             print("Proceeding...")
@@ -247,8 +292,10 @@ class TFacquisition:
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.unblank_beam()
 
-        bf_image = self.microscope.acquisition.acquire_stem_image(DetectorType.BF_S, resolution, exposure)
-        
+        bf_image = self.microscope.acquisition.acquire_stem_image(
+            DetectorType.BF_S, resolution, exposure
+        )
+
         self.blank_beam()
 
         # Normalize image data
@@ -267,14 +314,14 @@ class TFacquisition:
         if return_pixel_size:
             pixel_size_tuple = (
                 bf_image.metadata.binary_result.pixel_size.x,
-                bf_image.metadata.binary_result.pixel_size.y
+                bf_image.metadata.binary_result.pixel_size.y,
             )
             if return_adorned_object:
                 return bf_image, image_data, bf_filename, pixel_size_tuple
             return image_data, bf_filename, pixel_size_tuple
 
         return image_data, bf_filename
-    
+
     def acquire_haadf_bf(
         self,
         exposure: float = 40e-9,
@@ -282,15 +329,17 @@ class TFacquisition:
         return_pixel_size: bool = False,
         dont_save_but_return_object: bool = False,
         return_adorned_object: bool = False,
-        folder_path: str = "./"
+        folder_path: str = "./",
     ) -> Optional[Tuple[np.ndarray, np.ndarray, str, Optional[Tuple[float, float]]]]:
         """Acquire HAADF and BF STEM images."""
 
         logging.info("Acquiring HAADF and BF images.")
 
         if exposure > 2e-6:
-            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
-            if confirm.lower() != 'yes':
+            confirm = input(
+                f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): "
+            )
+            if confirm.lower() != "yes":
                 print("Operation canceled.")
                 return None
             print("Proceeding...")
@@ -301,7 +350,7 @@ class TFacquisition:
         settings = StemAcquisitionSettings(
             exposure,
             detector_types=[DetectorType.HAADF, DetectorType.BF_S],
-            size=resolution
+            size=resolution,
         )
 
         images = self.microscope.acquisition.acquire_stem_images_advanced(settings)
@@ -331,14 +380,22 @@ class TFacquisition:
         if return_pixel_size:
             pixel_size_tuple = (
                 haadf_image.metadata.binary_result.pixel_size.x,
-                haadf_image.metadata.binary_result.pixel_size.y
+                haadf_image.metadata.binary_result.pixel_size.y,
             )
             if return_adorned_object:
-                return haadf_image, bf_image, haadf_data, bf_data, haadf_filename, bf_filename, pixel_size_tuple
+                return (
+                    haadf_image,
+                    bf_image,
+                    haadf_data,
+                    bf_data,
+                    haadf_filename,
+                    bf_filename,
+                    pixel_size_tuple,
+                )
             return haadf_data, bf_data, haadf_filename, bf_filename, pixel_size_tuple
 
         return haadf_data, bf_data, haadf_filename, bf_filename
-    
+
     def acquire_ceta_or_flucam(
         self,
         exposure: float = 0.1,
@@ -347,12 +404,14 @@ class TFacquisition:
         dont_save_but_return_object: bool = False,
         return_adorned_object: bool = False,
         return_pixel_size: bool = False,
-        folder_path: str = "./"
+        folder_path: str = "./",
     ) -> Tuple[np.ndarray, str, Optional[Tuple]]:
         """Acquire CETA or FLUCAM image."""
         if exposure > 0.5:
-            confirm = input(f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): ")
-            if confirm.lower() != 'yes':
+            confirm = input(
+                f"Exposure is {exposure}, which exceeds the threshold. Do you want to proceed? (yes/no): "
+            )
+            if confirm.lower() != "yes":
                 print("Operation canceled.")
                 return
 
@@ -368,7 +427,9 @@ class TFacquisition:
         logging.info(f"Acquiring {camera} image.")
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.unblank_beam()
-        image = self.microscope.acquisition.acquire_camera_image(cam_type, resolution, exposure)
+        image = self.microscope.acquisition.acquire_camera_image(
+            cam_type, resolution, exposure
+        )
         self.blank_beam()
         self.ceta_cam.retract()
 
@@ -385,14 +446,14 @@ class TFacquisition:
         if return_pixel_size and return_adorned_object:
             pixel_size_tuple = (
                 image.metadata.binary_result.pixel_size.x,
-                image.metadata.binary_result.pixel_size.y
+                image.metadata.binary_result.pixel_size.y,
             )
             return image, image_data, image_name, pixel_size_tuple
 
         if return_pixel_size:
             pixel_size_tuple = (
                 image.metadata.binary_result.pixel_size.x,
-                image.metadata.binary_result.pixel_size.y
+                image.metadata.binary_result.pixel_size.y,
             )
             return image_data, image_name, pixel_size_tuple
 
@@ -403,15 +464,17 @@ class TFacquisition:
         image_with_scale_bar = self.vt_add_scale_bar(image)
         vision_toolkit.plot_image(image_with_scale_bar)
         logging.info("DONE: Plotting  ")
-        return 
+        return
 
-    def vt_plot_images(self, images: Sequence[AdornedImage],  add_scale_bar: bool = True) -> None:
+    def vt_plot_images(
+        self, images: Sequence[AdornedImage], add_scale_bar: bool = True
+    ) -> None:
         logging.info("Request to invoke vision toolkit to plot an Adorned image's")
-        images_with_scale_bar = [self.vt_add_scale_bar(i) for i in images ]
+        images_with_scale_bar = [self.vt_add_scale_bar(i) for i in images]
         vision_toolkit.plot_images(images_with_scale_bar)
         logging.info("DONE: Plotting  ")
-        return 
-    
+        return
+
     def vt_add_scale_bar(self, image: AdornedImage) -> None:
         logging.info("Request to invoke vision toolkit to add scalebar")
         logging.info("make sure the scrip[t has access to arial.ttf font")
@@ -420,13 +483,12 @@ class TFacquisition:
         logging.info("DONE: added scalebar to the image")
         return image
 
-    def query_defocus(self)-> str:
+    def query_defocus(self) -> str:
         logging.info("Request to query the defocus value")
         val = self.microscope
         logging.info(f"DONE: The state of the HAADF is {val} ")
         return val
 
-            
     def drift_correct(self, haadf_image: np.ndarray, haadf_image_shifted: np.ndarray):
         """Perform drift correction based on HAADF."""
         logging.info("Performing drift correction.")
@@ -443,9 +505,16 @@ class TFacquisition:
         """Get cbed pattern at center."""
         logging.info("Acquiring ceta ")
         # Simulated edge detection
-        return 
-    
-    def configure_eds_settings(self, eds_detector_name: str = EdsDetectorType.SUPER_X, dispersion: int=5, shaping_time: float = 3e-6, exposure_time: float = 2, exposure_time_type: str = ExposureTimeType.LIVE_TIME) -> EdsAcquisitionSettings:
+        return
+
+    def configure_eds_settings(
+        self,
+        eds_detector_name: str = EdsDetectorType.SUPER_X,
+        dispersion: int = 5,
+        shaping_time: float = 3e-6,
+        exposure_time: float = 2,
+        exposure_time_type: str = ExposureTimeType.LIVE_TIME,
+    ) -> EdsAcquisitionSettings:
         """Configure the EDS acquisition settings."""
         logging.info("Request prepare settings for EDS acquisiton.")
         settings = EdsAcquisitionSettings()
@@ -456,51 +525,70 @@ class TFacquisition:
         settings.exposure_time_type = exposure_time_type
         logging.info("DONE: Request prepare settings for EDS acquisiton.")
         return settings
-    
-    def acquire_eds(self, settings: EdsAcquisitionSettings, handle_byte_order : bool = True) -> Union[np.ndarray, AdornedSpectrum]:
+
+    def acquire_eds(
+        self, settings: EdsAcquisitionSettings, handle_byte_order: bool = True
+    ) -> Union[np.ndarray, AdornedSpectrum]:
         """Perform EDS : TODO - make sure byte order issue is taken care from tf side"""
         logging.info("Request for eds acquisiton")
         if settings == None:
             settings = self.configure_eds_settings()
         eds_spectrum = self.microscope.analysis.acquire_eds_spectrum(settings)
-        
+
         if handle_byte_order == True:
             logging.info("Handling byte order issue----verify if not----needed")
-            dt = np.dtype('uint32').newbyteorder('<')
+            dt = np.dtype("uint32").newbyteorder("<")
             eds_spectrum = np.frombuffer(eds_spectrum._raw_data, dtype=dt)
 
         logging.info("DONE: Request for eds acquisiton")
         return eds_spectrum
 
-    def autofocus(self, exposure : float = 1e-5, haadf_resolution: int = 1024) -> None:
+    def autofocus(self, exposure: float = 1e-5, haadf_resolution: int = 1024) -> None:
         """Perform autofocus with HAADF detector"""
         logging.info("Performing autofocus with HAADF detector")
-        settings = RunStemAutoFocusSettings(DetectorType.HAADF, haadf_resolution, exposure, True, reset_beam_blanker_afterwards=True)
+        settings = RunStemAutoFocusSettings(
+            DetectorType.HAADF,
+            haadf_resolution,
+            exposure,
+            True,
+            reset_beam_blanker_afterwards=True,
+        )
         self.microscope.auto_functions.run_stem_auto_focus(settings)
         logging.info("DONE autofocus with HAADF detector")
         return None
 
-        
-    def optistem_c1(self, dwell_time : float = 2e-06, cutoff_in_pixels: int = 5) -> None:
+    def optistem_c1(self, dwell_time: float = 2e-06, cutoff_in_pixels: int = 5) -> None:
         """Perform optistem - defocus - c1"""
         logging.info("Performing c1 optistem correction.")
-        settings = RunOptiStemSettings(method=OptiStemMethod.C1, dwell_time=dwell_time, cutoff_in_pixels=cutoff_in_pixels)
+        settings = RunOptiStemSettings(
+            method=OptiStemMethod.C1,
+            dwell_time=dwell_time,
+            cutoff_in_pixels=cutoff_in_pixels,
+        )
         self.microscope.auto_functions.run_opti_stem(settings)
         logging.info("DONE c1 optistem correction.")
         return None
 
-    def optistem_c1_a1(self, dwell_time : float = 2e-06, cutoff_in_pixels: int = 5) -> None:
+    def optistem_c1_a1(
+        self, dwell_time: float = 2e-06, cutoff_in_pixels: int = 5
+    ) -> None:
         """Perform optistem - defocus - c1_a1"""
         logging.info("Performing c1_a1 optistem correction.")
-        settings = RunOptiStemSettings(method=OptiStemMethod.C1_A1, dwell_time=dwell_time, cutoff_in_pixels=cutoff_in_pixels)
+        settings = RunOptiStemSettings(
+            method=OptiStemMethod.C1_A1,
+            dwell_time=dwell_time,
+            cutoff_in_pixels=cutoff_in_pixels,
+        )
         self.microscope.auto_functions.run_opti_stem(settings)
         logging.info("DONE c1 a1 optistem correction.")
         return None
-    
+
     def optistem_b2_a2(self, dwell_time: float = 2e-06) -> None:
         """Perform optistem - 2nd order"""
         logging.info("Performing B2_A2 optistem correction.")
-        settings = RunOptiStemSettings(method=OptiStemMethod.B2_A2, dwell_time=dwell_time)
+        settings = RunOptiStemSettings(
+            method=OptiStemMethod.B2_A2, dwell_time=dwell_time
+        )
         self.microscope.auto_functions.run_opti_stem(settings)
         logging.info("DONE B2_A2 optistem correction.")
         return None
@@ -512,47 +600,66 @@ class TFacquisition:
         logging.info(f"DONE: Query Paused beam position: which is at {pos}")
         return pos
 
-    def move_paused_beam(self, x : float, y: float ) -> None:
+    def move_paused_beam(self, x: float, y: float) -> None:
         # x lies b/w 0 to 1 and y lies b/w 0 to 1
-        logging.info(f"Set beam position: old {self.microscope.optics.paused_scan_beam_position}")
+        logging.info(
+            f"Set beam position: old {self.microscope.optics.paused_scan_beam_position}"
+        )
         self.microscope.optics.paused_scan_beam_position = [x, y]
-        logging.info(f"UPDATED beam position: New{self.microscope.optics.paused_scan_beam_position}")
+        logging.info(
+            f"UPDATED beam position: New{self.microscope.optics.paused_scan_beam_position}"
+        )
         return
 
-    def rad2miliDegree(self, radians : float) -> float:
-        radians_to_degree_value = np.rad2deg(radians)*(10**-3)
+    def rad2miliDegree(self, radians: float) -> float:
+        radians_to_degree_value = np.rad2deg(radians) * (10**-3)
         return radians_to_degree_value
-    
 
-    def rad2miliDegree_stage(self, alpha_beta_rad: Tuple[float, float], single_tilt_holder = True) -> Tuple[float, float]:
+    def rad2miliDegree_stage(
+        self, alpha_beta_rad: Tuple[float, float], single_tilt_holder=True
+    ) -> Tuple[float, float]:
         # TODO: handle the holder better --> set variable while initalizing
         if single_tilt_holder:
             return self.rad2miliDegree(alpha_beta_rad[0])
-        
+
         else:
-            alpha, beta = (self.rad2miliDegree(i) for i in alpha_beta_rad)  # Unpack to ensure exactly two elements
+            alpha, beta = (
+                self.rad2miliDegree(i) for i in alpha_beta_rad
+            )  # Unpack to ensure exactly two elements
         return (alpha, beta)
-    
+
     def miliDegree2rad(self, millidegrees: float) -> float:
         """Convert millidegrees back to radians."""
         return np.deg2rad(millidegrees * (10**3))
 
-    def miliDegree2rad_stage(self, alpha_beta_milideg: Tuple[float, float]) -> Tuple[float, float]:
+    def miliDegree2rad_stage(
+        self, alpha_beta_milideg: Tuple[float, float]
+    ) -> Tuple[float, float]:
         """Convert a tuple of millidegrees back to a tuple of radians."""
-        alpha, beta = (self.miliDegree2rad(i) for i in alpha_beta_milideg)  # Unpack to ensure exactly two elements
+        alpha, beta = (
+            self.miliDegree2rad(i) for i in alpha_beta_milideg
+        )  # Unpack to ensure exactly two elements
         return (alpha, beta)
-    
-    def query_stage_position(self) -> StagePosition:
-        #Returns the stage position (X, Y, Z) in meters, A and B in radians.
-        logging.info("Querying the stage position now: the stage position (X, Y, Z) in meters, A and B in radians")
-        pos = self.microscope.specimen.stage.position
-        pos_dict_m = {"x" : pos[0], "y" : pos[1], "z" : pos[2]}
-        pos_dict_nm = {"x" : pos[0]*10**(-9), "y" : pos[1]*10**(-9), "z" : pos[2]*10**(-9)}
 
-        angle_tuple_rad = (pos[3], pos[4])# A and B
+    def query_stage_position(self) -> StagePosition:
+        # Returns the stage position (X, Y, Z) in meters, A and B in radians.
+        logging.info(
+            "Querying the stage position now: the stage position (X, Y, Z) in meters, A and B in radians"
+        )
+        pos = self.microscope.specimen.stage.position
+        pos_dict_m = {"x": pos[0], "y": pos[1], "z": pos[2]}
+        pos_dict_nm = {
+            "x": pos[0] * 10 ** (-9),
+            "y": pos[1] * 10 ** (-9),
+            "z": pos[2] * 10 ** (-9),
+        }
+
+        angle_tuple_rad = (pos[3], pos[4])  # A and B
         angle_list_miliDegree = self.rad2miliDegree_stage(angle_tuple_rad)
-        
-        logging.info(f"Query stage position: which is at {pos}, i.e pos in nm {pos_dict_nm}, angles in mili degree{angle_list_miliDegree}")
+
+        logging.info(
+            f"Query stage position: which is at {pos}, i.e pos in nm {pos_dict_nm}, angles in mili degree{angle_list_miliDegree}"
+        )
         return pos
 
     def undo_last_stage_movement(self) -> None:
@@ -560,55 +667,73 @@ class TFacquisition:
         pos = self.last_stage_postion
         self.microscope.specimen.stage.absolute_move(pos)
         self.current_stage_position = self.query_stage_position()
-        logging.info(f"DONE : undo last stage movement - stage is now at {self.current_stage_position}")
+        logging.info(
+            f"DONE : undo last stage movement - stage is now at {self.current_stage_position}"
+        )
         return None
 
-    def move_stage_translation_relative(self, x: float, y: float, z: float, relative: bool = True) ->  None:
+    def move_stage_translation_relative(
+        self, x: float, y: float, z: float, relative: bool = True
+    ) -> None:
         ## put x, y, z in nm
         logging.info("Request to translate the stage relative values")
-        self.microscope.specimen.stage.relative_move(StagePosition(x = x*10**-9, y = y*10**-9 , z = z*10**-9))
+        self.microscope.specimen.stage.relative_move(
+            StagePosition(x=x * 10**-9, y=y * 10**-9, z=z * 10**-9)
+        )
         logging.info("Done: translate the stage relative values")
 
-        pass     
+        pass
 
-    def move_stage_translation_absolute(self, x: float, y: float, z: float, relative: bool = True) ->  None:
+    def move_stage_translation_absolute(
+        self, x: float, y: float, z: float, relative: bool = True
+    ) -> None:
         ## put x, y, z in m - unlike the  move_stage_translation_relative
         logging.info("Request to translate the stage absolute values")
-        self.microscope.specimen.stage.absolute_move_safe(StagePosition(x = x, y = y , z = z))
+        self.microscope.specimen.stage.absolute_move_safe(StagePosition(x=x, y=y, z=z))
         logging.info("DONE: shifted atage to absolute values")
-        pass     
-        
-    def move_stage_rotation(self, alpha: float = None, beta: float = None, single_tilt_holder = True):
-        ## put A and B in milidegrees 
+        pass
+
+    def move_stage_rotation(
+        self, alpha: float = None, beta: float = None, single_tilt_holder=True
+    ):
+        ## put A and B in milidegrees
         # Single tilt holder may have just one A angle
         logging.info("Request to rotate the stage")
         angles_in_radians = self.miliDegree2rad_stage((alpha, beta))
         if single_tilt_holder:
             logging.info("holder is sigle Tilt")
-            self.microscope.specimen.stage.relative_move(StagePosition(a = angles_in_radians[0]))
+            self.microscope.specimen.stage.relative_move(
+                StagePosition(a=angles_in_radians[0])
+            )
             logging.info(f"Stage rotated by {alpha} milidegree")
         else:
             logging.info("holder is Double Tilt")
-            self.microscope.specimen.stage.relative_move(StagePosition(a = angles_in_radians[0], b = angles_in_radians[1]))
+            self.microscope.specimen.stage.relative_move(
+                StagePosition(a=angles_in_radians[0], b=angles_in_radians[1])
+            )
             logging.info(f"Stage rotated by {alpha, beta} milidegree")
         pass
-    
+
     def query_beam_shift_position(self) -> Point:
         # the pos we get here is in m
         logging.info("Request to query the beam(not paused beam) position")
         pos = self.microscope.optics.deflectors.beam_shift
         logging.info(f"Done to query the beam(not paused beam) position: at {pos}")
         return pos
-    
-    def move_beam_shift_positon(self, pos = Tuple[float, float])-> None:
+
+    def move_beam_shift_positon(self, pos=Tuple[float, float]) -> None:
         # pos is in metres for x and y
         self.last_beam_shift_pos = self.microscope.optics.deflectors.beam_shift
-        logging.info(f"Request to shift the beam(not paused beam), old position in meters {self.last_beam_shift_pos}")
+        logging.info(
+            f"Request to shift the beam(not paused beam), old position in meters {self.last_beam_shift_pos}"
+        )
         self.microscope.optics.deflectors.beam_shift = list(pos)
         self.current_beam_shift_pos = self.microscope.optics.deflectors.beam_shift
-        logging.info(f"Done: beam shift(not paused beam) to {self.current_beam_shift_pos}")
-        return 
-        
+        logging.info(
+            f"Done: beam shift(not paused beam) to {self.current_beam_shift_pos}"
+        )
+        return
+
     def query_is_beam_blanked(self) -> bool:
         try:
             # Try using the old version first
@@ -644,35 +769,35 @@ class TFacquisition:
             logging.info("Performing beam UNblanking (fallback to blanker)")
             self.microscope.optics.blanker.unblank()
             logging.info("DONE -- beam UNblanking (fallback method)")
- 
+
     def query_vacuum_valves(self) -> str:
         # Check status of the column valves
         logging.info("Request: Checking for vacuum valves -- current status")
         val = self.microscope.vacuum.column_valves.state
         logging.info(f"DONE: Checking for vacuum valves -- current status: {val}")
         return val
-    
+
     def open_vacuum_valves(self) -> None:
-        #Perform vacuum valves to open
+        # Perform vacuum valves to open
         logging.info("Performing vacuum valves to open")
         self.microscope.vacuum.column_valves.open()
         logging.info("DONE -- Open vacuum valves")
-        return 
+        return
 
     def close_vacuum_valves(self) -> None:
-        #Perform vacuum valves to open
+        # Perform vacuum valves to open
         logging.info("Performing vacuum valves to close")
         self.microscope.vacuum.column_valves.close()
         logging.info("DONE -- CLose vacuum valves")
-        return 
+        return
 
     def query_screen_current(self) -> str:
-        # measure screen current 
+        # measure screen current
         logging.info("Measuring screen current")
-        val = str(self.microscope.detectors.screen.measure_current() * 1E12) + "pA"
+        val = str(self.microscope.detectors.screen.measure_current() * 1e12) + "pA"
         logging.info(f"DONE -- Querying screen current - value {val}")
         return val
-    
+
     def query_FOV(self) -> Tuple[float, str, str]:
         # query feild of view
         # field of view 80Kx : 1.05522326521168e-06
@@ -685,12 +810,14 @@ class TFacquisition:
         # field of view 14.5Mx : 5.79722270188654e-09
         # field of view of 16Mx : 5.19444479862847e-09
         fov_val = self.microscope.optics.scan_field_of_view
-        magnification_val_Kx = str((0.08442 /fov_val)/1000)+ "Kx"
-        magnification_val_Mx = str((0.08442 /fov_val)/1000000)+ "Mx"
+        magnification_val_Kx = str((0.08442 / fov_val) / 1000) + "Kx"
+        magnification_val_Mx = str((0.08442 / fov_val) / 1000000) + "Mx"
 
-        logging.info(f"DONE querying the field of view - value = {fov_val} which in Magnificatoin is {magnification_val_Kx} in Kx and Mx is {magnification_val_Mx}")
+        logging.info(
+            f"DONE querying the field of view - value = {fov_val} which in Magnificatoin is {magnification_val_Kx} in Kx and Mx is {magnification_val_Mx}"
+        )
         return fov_val, magnification_val_Kx, magnification_val_Mx
-    
+
     def set_FOV(self, magnification: str) -> None:
         # TODO: Get rid of the dictionary and directly use formula: trivial
         FIELD_OF_VIEW = {
@@ -702,16 +829,27 @@ class TFacquisition:
             "4Mx": 2.07777791945139e-08,
             "8Mx": 1.03888895972569e-08,
             "14.5Mx": 5.79722270188654e-09,
-            "16Mx": 5.19444479862847e-09
-                        }
-        logging.info(f"Setting Magnification to {magnification}--- in FOV: {FIELD_OF_VIEW[magnification]}")
+            "16Mx": 5.19444479862847e-09,
+        }
+        logging.info(
+            f"Setting Magnification to {magnification}--- in FOV: {FIELD_OF_VIEW[magnification]}"
+        )
         self.microscope.optics.scan_field_of_view = FIELD_OF_VIEW[magnification]
         logging.info("FOV is now set")
         return
 
-    def jog_and_capture_with_metrics(self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), steps: int = 1, seconds_per_step: int = 2, resolution: int = 512,  exposure: float = 200e-9, min_steps: int = 4, max_decline_counter: int = 1) -> str:
-        # trick: better to have lower stage velocity and higher numbre of steps for more controlled stage movement 
-        # have the scan rotation to 0 
+    def jog_and_capture_with_metrics(
+        self,
+        stage_vel: StageVelocity = StageVelocity(z=+50e-9),
+        steps: int = 1,
+        seconds_per_step: int = 2,
+        resolution: int = 512,
+        exposure: float = 200e-9,
+        min_steps: int = 4,
+        max_decline_counter: int = 1,
+    ) -> str:
+        # trick: better to have lower stage velocity and higher numbre of steps for more controlled stage movement
+        # have the scan rotation to 0
         logging.info("Request to jog the stage and store haadf and stage position.")
         image_data = []
         stage_positions = []
@@ -724,9 +862,8 @@ class TFacquisition:
             print(f"\nStep {step + 1} of {steps}")
 
             # Jog the stage
-            
+
             time.sleep(seconds_per_step)
-            
 
             # Record current Z position
             pos = self.query_stage_position()
@@ -734,8 +871,10 @@ class TFacquisition:
 
             # Acquire HAADF image
             image, _, _, _ = self.acquire_haadf(
-                exposure=exposure, resolution=resolution,
-                return_pixel_size=True, return_adorned_object=True
+                exposure=exposure,
+                resolution=resolution,
+                return_pixel_size=True,
+                return_adorned_object=True,
             )
 
             # Normalize image
@@ -760,7 +899,7 @@ class TFacquisition:
                 else:
                     decline_counter = 0
 
-                if  step > min_steps and decline_counter >= max_decline_counter:
+                if step > min_steps and decline_counter >= max_decline_counter:
                     print(" Metric declined 3 times in a row. Stopping early.")
                     self.microscope.specimen.stage.stop_jogging()
                     break
@@ -768,34 +907,39 @@ class TFacquisition:
             previous_metric = metric
         logging.info("DONE: stage jogging")
         return image_data, stage_positions
-        
 
-    
-    def jog_stage_or_piezoStage(self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), piezo: bool = False) -> str:
+    def jog_stage_or_piezoStage(
+        self, stage_vel: StageVelocity = StageVelocity(z=+50e-9), piezo: bool = False
+    ) -> str:
         logging.info("Request to jog the stage/piezo")
-        if piezo :
+        if piezo:
             logging.info("Piezo mode")
             if not self.microscope.specimen.piezo_stage.is_enabled:
                 logging.info("peizo stage not enabled --- enabling")
                 self.microscope.specimen.piezo_stage.enable
-                logging.info(f"strting to move the piezo stage with velocity{stage_vel}")
+                logging.info(
+                    f"strting to move the piezo stage with velocity{stage_vel}"
+                )
                 self.microscope.specimen.piezo_stage.start_jogging(stage_vel)
             else:
-                logging.info(f"strting to move the piezo stage with velocity{stage_vel}")
+                logging.info(
+                    f"strting to move the piezo stage with velocity{stage_vel}"
+                )
                 self.microscope.specimen.piezo_stage.start_jogging(stage_vel)
 
         else:
-                logging.info(f"strting to move the stage with velocity{stage_vel}")
-                self.microscope.specimen.stage.start_jogging(stage_vel)
+            logging.info(f"strting to move the stage with velocity{stage_vel}")
+            self.microscope.specimen.stage.start_jogging(stage_vel)
 
-
-        logging.info("DONE: stage/peizo_stage is moving dont forget to stop it if needed")
+        logging.info(
+            "DONE: stage/peizo_stage is moving dont forget to stop it if needed"
+        )
         print("stage/peizo_stage is moving dont forget to stop it if needed")
-        return 
-    
+        return
+
     def stop_jog_stage_or_piezoStage(self, piezo: bool = False) -> str:
         logging.info("Request to stop the stage/piezo_stage")
-        if piezo :
+        if piezo:
             logging.info("Piezo mode")
             if not self.microscope.specimen.piezo_stage.is_moving:
                 self.microscope.specimen.piezo_stage.stop()
@@ -803,61 +947,69 @@ class TFacquisition:
                 logging.info("piezo is not moving in the first place")
 
         else:
-                self.microscope.specimen.stage.stop_jogging()
-
+            self.microscope.specimen.stage.stop_jogging()
 
         logging.info("DONE: stage/peizo_stage is stopped moving")
         print("stage/peizo_stage has stopped moving")
-        return 
+        return
+
 
 class DMacquisition:
     # acquires HAADF[with scalebar], CBED, EDX
     # also does optistem(C1_A1, C1, B2_A2)
     # later - drift correct on HAADF, defocus series, Segment regions and cbed
-    def __init__(self, microscope: Optional[Union[Pyro5.api.Proxy, DMtwin]], offline: bool = True) -> None:
+    def __init__(
+        self, microscope: Optional[Union[Pyro5.api.Proxy, DMtwin]], offline: bool = True
+    ) -> None:
         """Initialize the microscope and set up acquisition parameters."""
         self.offline = offline
-        if not self.offline :
+        if not self.offline:
             self.microscope = microscope
             logging.info("initializing Microscope")
             logging.info("activating camera")
             self.microscope.activate_camera()
-            array_list, shape, dtype = self.microscope.get_ds(128, 128)#----------- just to start the connection
-            im_array = np.array(array_list, dtype=dtype).reshape(shape)# 4.6 seconds
+            array_list, shape, dtype = self.microscope.get_ds(
+                128, 128
+            )  # ----------- just to start the connection
+            im_array = np.array(array_list, dtype=dtype).reshape(shape)  # 4.6 seconds
             logging.info("Microscope initialized with dummy DigiScan acquisition")
-            
-        else:## offline
+
+        else:  ## offline
             logging.info("initializing OFFLINE Microscope")
             self.microscope = DMtwin()
             logging.info("Done: initialized OFFLINE Microscope")
         return None
-    
-    
-    def get_eels(self, eels_exposure_seconds : int = 2) -> np.ndarray:
+
+    def get_eels(self, eels_exposure_seconds: int = 2) -> np.ndarray:
         """Perform EELS acquisition to just check"""
         # TODO: eels_disp_mult --> need to handle
         if not self.offline:
             logging.info("Performing EELS")
-            self.microscope.acquire_camera(exposure = eels_exposure_seconds)
+            self.microscope.acquire_camera(exposure=eels_exposure_seconds)
             # microscope.optics.blank()
             array_list, shape, dtype = self.microscope.get_eels()
             array = np.array(array_list, dtype=dtype).reshape(shape)
             logging.info("DONE EELS")
-            
-        else:# offline
+
+        else:  # offline
             logging.info("Performing EELS")
             # microscope.optics.blank()
             array_list, shape, dtype = self.microscope.get_eels()
             array = np.array(array_list, dtype=dtype).reshape(shape)
             logging.info("DONE EELS ")
-            
+
         return array
 
-    def acquire_eels_threading(self, eels_exposure_seconds : int = 2, eels_dispersion : float = 0.3, eels_dispersion_mult : float = 0, eels_cycles = 1) -> np.ndarray:
+    def acquire_eels_threading(
+        self,
+        eels_exposure_seconds: int = 2,
+        eels_dispersion: float = 0.3,
+        eels_dispersion_mult: float = 0,
+        eels_cycles=1,
+    ) -> np.ndarray:
         """Perform EELS acquisition to across points and get single spectrum"""
         logging.info("DONE EELS at dummy points just for checking.")
-        return 
-
+        return
 
 
 class CEOSacquisition:
@@ -905,11 +1057,10 @@ class CEOSacquisition:
         raise RuntimeError(result.get("error", "Unknown error"))
 
     def run_tableau(self, tab_type: str = "Standard", angle: float = 18):
-        logging.info("Request to run Tableau - default beam angle is 18 mrad (milli-radian)")
-        data = self._run_rpc("acquireTableau", {
-            "tabType": tab_type,
-            "angle": angle
-        })
+        logging.info(
+            "Request to run Tableau - default beam angle is 18 mrad (milli-radian)"
+        )
+        data = self._run_rpc("acquireTableau", {"tabType": tab_type, "angle": angle})
         logging.info("DONE: Request to run Tableau")
         return data
 
@@ -946,7 +1097,6 @@ class CEOSacquisition:
         return result
 
 
-
 class CEOSacquisitionTCP:
     def __init__(self, host="127.0.0.1", port=7072):
         self.host = host
@@ -959,7 +1109,9 @@ class CEOSacquisitionTCP:
         payload = json_msg.encode("utf-8")
         netstring = f"{len(payload)}:".encode("ascii") + payload + b","
 
-        with socket.create_connection((self.host, self.port), timeout=3000) as sock:  # 5 minutes
+        with socket.create_connection(
+            (self.host, self.port), timeout=3000
+        ) as sock:  # 5 minutes
             sock.sendall(netstring)
 
             # Read until we hit a complete netstring (ends with b",")
@@ -1010,6 +1162,7 @@ class CEOSacquisitionTCP:
 
     def measure_c1a1(self):
         return self._run_rpc("measureC1A1", {})
+
 
 class EDGEfilterAcquisition:
     def __init__(self, microscope):

@@ -1,6 +1,12 @@
 from google import genai  # make sure this is installed and authenticated properly
 
-def generate_stem_analysis(file_path: str, prompt: str, model_name: str = "gemini-2.0-flash-exp-image-generation", api_key: str = None):
+
+def generate_stem_analysis(
+    file_path: str,
+    prompt: str,
+    model_name: str = "gemini-2.0-flash-exp-image-generation",
+    api_key: str = None,
+):
     """
     Uploads a STEM image and queries the Gemini model with a given prompt.
 
@@ -25,8 +31,7 @@ def generate_stem_analysis(file_path: str, prompt: str, model_name: str = "gemin
 
     try:
         response = client.models.generate_content(
-            model=model_name,
-            contents=[uploaded_file, prompt]
+            model=model_name, contents=[uploaded_file, prompt]
         )
         return response.text
     except Exception as e:
