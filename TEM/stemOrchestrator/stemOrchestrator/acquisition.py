@@ -431,7 +431,7 @@ class TFacquisition:
             cam_type, resolution, exposure
         )
         self.blank_beam()
-        self.ceta_cam.retract()
+        # self.ceta_cam.retract()#####--> inserting and retracting should be avoided in code 
 
         img = image.data - np.min(image.data)
         image_data = (255 * (img / np.max(img))).astype(np.uint8)
