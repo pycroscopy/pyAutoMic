@@ -219,6 +219,7 @@ AS_1.14_wheels/
 notebooks/atomGPT_related/atomgpt/
 notebooks/with_KB/
 notebooks/with_AH/
+notebooks/with_other-users/
 notebooks/tutorials/EDS.ipynb
 
 notebooks/BO_related/active-learning-in-microscopy/
