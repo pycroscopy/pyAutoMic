@@ -70,12 +70,12 @@ include = ["stemorchestrator*"]
 exclude = ["notebooks*", "scripts*", "tests*", "docs*"]
 
 [tool.uv.sources]
+scilink = { git = "https://github.com/ziatdinovmax/SciLink" }
 autoscript-core = { path = "AS_1.14_wheels/autoscript_core-5.32.0-py3-none-any.whl" }
 autoscript-tem-microscope-client-tests = { path = "AS_1.14_wheels/autoscript_tem_microscope_client_tests-1.14.0-py3-none-any.whl" }
 autoscript-tem-microscope-client = { path = "AS_1.14_wheels/autoscript_tem_microscope_client-1.14.0-py3-none-any.whl" }
 autoscript-tem-toolkit = { path = "AS_1.14_wheels/autoscript_tem_toolkit-1.14.0-py3-none-any.whl" }
 thermoscientific-logging = { path = "AS_1.14_wheels/thermoscientific_logging-5.32.0-py3-none-any.whl" }
-scilink = { git = "https://github.com/ziatdinovmax/SciLink" }
 
 [tool.uv.workspace]
 members = []

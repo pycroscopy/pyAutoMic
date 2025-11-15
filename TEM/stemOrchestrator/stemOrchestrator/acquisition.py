@@ -1150,7 +1150,7 @@ class CEOSacquisitionTCP:
     def run_tableau(self, tab_type="Standard", angle=18):
         return self._run_rpc("acquireTableau", {"tabType": tab_type, "angle": angle})
 
-    def correct_aberration(self, name: str, value=None, target=None, select=None):
+    def correct_aberration(self, name: str, value=None, target=None,  select=None):
         params = {"name": name}
         if value:
             params["value"] = list(value)
@@ -1162,6 +1162,9 @@ class CEOSacquisitionTCP:
 
     def measure_c1a1(self):
         return self._run_rpc("measureC1A1", {})
+    
+    def get_Info(self):
+        return self._run_rpc("getInfo", {})
 
 
 class EDGEfilterAcquisition:
