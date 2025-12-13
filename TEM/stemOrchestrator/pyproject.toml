@@ -53,6 +53,13 @@ dependencies = [
     "atomai>=0.8.1",
     "google-genai>=1.44.0",
     "scilink",
+    "trackpy>=0.7",
+    "pims>=0.7",
+    "pycocotools>=2.0.10",
+    "einops>=0.8.1",
+    "decord>=0.6.0",
+    "huggingface-hub>=0.35.0",
+    "ipympl>=0.9.7",
 ]
 
 [project.optional-dependencies]
