@@ -1,6 +1,6 @@
 # STEM-Orchestrator : Enabling Real-Time Multimodal Data Acquisition in (Scanning transmission electron microscopes)STEM 
 
-## [Link to Preprint - https://doi.org/10.31224/4645](https://engrxiv.org/preprint/view/4645/version/6316)
+## [Link to Preprint - https://engrxiv.org/preprint/view/4645/](https://engrxiv.org/preprint/view/4645/)
 
 <img src="./assests/stemOrchestratorv2.png" width="1000" height="300" alt="STEM Orchestrator">
 
