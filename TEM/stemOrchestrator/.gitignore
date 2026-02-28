@@ -188,6 +188,7 @@ config_secret.json
 *.jpg
 *.emd
 *.tif
+*.xml
 # Allow specific PNGs
 !assests/stemOrchestratorv2.png
 # Allow requirements
@@ -234,3 +235,6 @@ out/
 
 
 __MACOSX/
+PythonPackages-AS-1.15
+
+

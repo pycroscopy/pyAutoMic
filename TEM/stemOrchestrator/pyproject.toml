@@ -39,7 +39,7 @@ dependencies = [
     "transformers>=4.56.2",
     "trl==0.15.2",
     "twisted>=25.5.0",
-    "pytemlib>=0.2025.4.2",
+    "pytemlib==0.2026.1.3",
     "pip>=25.2",
     "pyqt6>=6.9.1",
     "pyside6>=6.9.2",
@@ -77,12 +77,12 @@ include = ["stemorchestrator*"]
 exclude = ["notebooks*", "scripts*", "tests*", "docs*"]
 
 [tool.uv.sources]
-scilink = { git = "https://github.com/ziatdinovmax/SciLink" }
-autoscript-core = { path = "AS_1.14_wheels/autoscript_core-5.32.0-py3-none-any.whl" }
-autoscript-tem-microscope-client-tests = { path = "AS_1.14_wheels/autoscript_tem_microscope_client_tests-1.14.0-py3-none-any.whl" }
-autoscript-tem-microscope-client = { path = "AS_1.14_wheels/autoscript_tem_microscope_client-1.14.0-py3-none-any.whl" }
-autoscript-tem-toolkit = { path = "AS_1.14_wheels/autoscript_tem_toolkit-1.14.0-py3-none-any.whl" }
-thermoscientific-logging = { path = "AS_1.14_wheels/thermoscientific_logging-5.32.0-py3-none-any.whl" }
+autoscript-core = { path = "PythonPackages-AS-1.15/autoscript_core-1.0.0-py3-none-any.whl" }
+autoscript-tem-microscope-client-tests = { path = "PythonPackages-AS-1.15/autoscript_tem_microscope_client_tests-1.15.0-py3-none-any.whl" }
+autoscript-tem-microscope-client = { path = "PythonPackages-AS-1.15/autoscript_tem_microscope_client-1.15.0-py3-none-any.whl" }
+autoscript-tem-snippets-tests = { path = "PythonPackages-AS-1.15/autoscript_tem_snippets_tests-1.15.0-py3-none-any.whl" }
+autoscript-tem-toolkit = { path = "PythonPackages-AS-1.15/autoscript_tem_toolkit-1.15.0-py3-none-any.whl" }
+thermoscientific-logging = { path = "PythonPackages-AS-1.15/thermoscientific_logging-1.0.0-py3-none-any.whl" }
 
 [tool.uv.workspace]
 members = []
