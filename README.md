@@ -1,7 +1,11 @@
 # pyAutoMic  
 **AI-assisted intelligent microscopy**
 
+## Important
 
+This repository is no longer actively maintained and is retained primarily for educational and reference purposes.
+
+Development efforts have since moved to **Asyncroscopy** (<https://github.com/pycroscopy/asyncroscopy>), which is designed to address the same challenges that PyAutoMic originally set out to solve, while providing a more modern and scalable framework.
 
 ---
 
